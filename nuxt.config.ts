@@ -21,7 +21,7 @@ export default defineNuxtConfig({
         'connect-src': ["'self'", 'https:', 'http:', 'http://localhost:9000', '*'], // API connections
         'upgrade-insecure-requests': true
       },
-      crossOriginEmbedderPolicy: process.env.NODE_ENV === 'development' ? 'unsafe-none' : 'require-corp',
+      crossOriginEmbedderPolicy: 'unsafe-none',
       xFrameOptions: 'DENY',
       xContentTypeOptions: 'nosniff',
       strictTransportSecurity: {
