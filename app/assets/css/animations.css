@@ -1,0 +1,141 @@
+/* =============================================
+   Desact Plus — Animations
+   ============================================= */
+
+/* ── Fade Up ──────────────────────────────────── */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Fade In ──────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Slide In from Left ──────────────────────── */
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ── Slide In from Right ─────────────────────── */
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ── Scale Up ─────────────────────────────────── */
+@keyframes scale-up {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ── Skeleton Shimmer ─────────────────────────── */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ── Ken Burns (subtle zoom) ──────────────────── */
+@keyframes ken-burns {
+  from { transform: scale(1); }
+  to   { transform: scale(1.06); }
+}
+
+/* ── Spin ─────────────────────────────────────── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Utility Classes ──────────────────────────── */
+.animate-fade-up {
+  animation: fade-up 0.7s var(--ease-out) forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s var(--ease-out) forwards;
+}
+
+.animate-slide-left {
+  animation: slide-in-left 0.6s var(--ease-out) forwards;
+}
+
+.animate-slide-right {
+  animation: slide-in-right 0.6s var(--ease-out) forwards;
+}
+
+.animate-scale-up {
+  animation: scale-up 0.5s var(--ease-out) forwards;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--dp-sand) 25%,
+    var(--dp-cream) 50%,
+    var(--dp-sand) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.animate-ken-burns {
+  animation: ken-burns 12s ease-in-out infinite alternate;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* ── Staggered delays ─────────────────────────── */
+.delay-1 { animation-delay: 100ms; }
+.delay-2 { animation-delay: 200ms; }
+.delay-3 { animation-delay: 300ms; }
+.delay-4 { animation-delay: 400ms; }
+.delay-5 { animation-delay: 500ms; }
+.delay-6 { animation-delay: 600ms; }
+
+/* ── Start hidden (for JS-triggered reveals) ─── */
+.reveal-hidden {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out);
+}
+
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}

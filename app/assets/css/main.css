@@ -1,0 +1,192 @@
+@import './tokens.css';
+@import './animations.css';
+
+/* =============================================
+   Desact Plus — Global Styles
+   ============================================= */
+
+:root {
+  /* Colors */
+  --dp-gold: #C19A5B;
+  --dp-gold-light: #D4B07A;
+  --dp-gold-dark: #A17F45;
+  --dp-ivory: #F4F3EF;
+  --dp-cream: #F3EDE4;
+  --dp-sand: #E8DFD3;
+  --dp-taupe: #B5A898;
+  --dp-stone: #8C8279;
+  --dp-charcoal: #1A1916;
+  --dp-graphite: #2D2A26;
+  --dp-slate: #4A4541;
+  --dp-ash: #6B6560;
+  --dp-white: #FFFFFF;
+  --dp-black: #0A0908;
+  --dp-bg-light: #F6F4EF;
+  --dp-bg-alt: #EAE8E4;
+  --dp-bg-darker: #DCD8D0;
+
+  /* Semantic Status Colors */
+  --dp-success: #16a34a;
+  --dp-success-bg: #f0fdf4;
+  --dp-error: #c44536;
+  --dp-error-bg: #fef2f2;
+  --dp-warning: #d97706;
+  --dp-warning-bg: #fffbeb;
+  --dp-neutral-border: #e0e0e0;
+  --dp-neutral-bg: #f3f3f3;
+
+  /* Typography */
+  /* --font-heading: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; */
+  --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Layout */
+  --max-width: 1440px;
+
+  /* Spacing */
+  --space-2: 0.5rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  /* Z-Index */
+  --z-base: 0;
+  --z-content: 10;
+  --z-overlay: 20;
+  --z-header: 100;
+}
+
+/* ── Base Defaults ── */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background-color: var(--dp-ivory);
+  color: var(--dp-charcoal);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: normal;
+}
+
+/* ── Links ────────────────────────────────────── */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ── Focus Styles ─────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--dp-gold);
+  outline-offset: 2px;
+}
+
+/* ── Scroll bar (subtle) ──────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--dp-taupe);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--dp-stone);
+}
+
+/* ── Selection ────────────────────────────────── */
+::selection {
+  background-color: var(--dp-gold);
+  color: var(--dp-white);
+}
+
+/* ── Utility: Container ──────────────────────── */
+.container-site {
+  width: 100%;
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-inline: var(--space-6);
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .container-site {
+    padding-inline: var(--space-8);
+  }
+}
+
+@media (min-width: 1280px) {
+  .container-site {
+    padding-inline: var(--space-12);
+  }
+}
+
+/* ── Typography Utilities ────────────────────── */
+/* (Removed utility classes font-heading and font-body per rules) */
+
+/* ── Animations ──────────────────────────────── */
+@keyframes ken-burns {
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slow-zoom {
+  animation: ken-burns 20s ease-in-out infinite alternate;
+}
+
+/* ── Vue transition: modal ────────────────────── */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 300ms;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}

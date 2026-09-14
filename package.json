@@ -1,0 +1,37 @@
+{
+  "name": "desact-plus",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "@nuxt/image": "^1.9.0",
+    "@vueuse/nuxt": "^13.5.0",
+    "lucide-vue-next": "^0.577.0",
+    "nuxt": "^4.5.2",
+    "sharp": "^0.35.4",
+    "vue": "^3.5.42",
+    "vue-router": "^5.3.0",
+    "vue-tsc": "^3.3.11"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.8.0",
+    "eslint": "^9.28.0",
+    "nuxt-security": "^2.6.0",
+    "playwright": "^1.63.0",
+    "postcss": "^8.5.28",
+    "prettier": "^3.5.3",
+    "typescript": "^5.4.5"
+  },
+  "allowScripts": {
+    "sharp@0.32.6": true,
+    "sharp@0.35.4": true
+  }
+}
