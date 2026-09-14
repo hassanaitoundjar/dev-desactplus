@@ -72,6 +72,7 @@ export default defineNuxtConfig({
   },
 
   image: {
+    domains: ['zainstudio.ma'],
     quality: 80,
     format: ['webp', 'avif'],
     screens: {
