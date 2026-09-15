@@ -79,12 +79,7 @@ const dynamicCategories = computed(() => {
 
       <!-- Right Actions -->
       <div class="header-actions">
-        <!-- Compare -->
-        <NuxtLink to="/compare" class="action-circle desktop-only">
-          <Shuffle :size="18" :stroke-width="1.5" />
-          <span class="action-badge" v-if="compareCount > 0">{{ compareCount }}</span>
-          <span class="action-badge" v-else>0</span>
-        </NuxtLink>
+      
 
         <!-- Wishlist -->
         <NuxtLink to="/wishlist" class="action-circle">
