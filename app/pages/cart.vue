@@ -3,12 +3,12 @@ import { useCart } from '~/composables/useCart'
 import { useProducts } from '~/composables/useProducts'
 import Container from '~/components/ui/Container.vue'
 import { formatPrice } from '~/utils/formatPrice'
-import { Trash2, ArrowRight, ShoppingBag, Truck, ShieldCheck, RotateCcw } from 'lucide-vue-next'
+import { Trash2, ArrowRight, ShoppingBag, Truck, ShieldCheck, RotateCcw, X } from 'lucide-vue-next'
 
 definePageMeta({ layout: 'default' })
 
 const router = useRouter()
-const { items, isEmpty, remove, updateQuantity, count, clear, subtotal, shippingTotal, cartTotal } = useCart()
+const { items, isEmpty, remove, updateQuantity, count, clear, subtotal, shippingTotal, cartTotal, discountTotal, couponCode, applyCoupon, removeCoupon } = useCart()
 const { products: allProducts } = useProducts()
 
 const cartProducts = computed(() => {
@@ -20,6 +20,43 @@ const cartProducts = computed(() => {
 })
 
 const itemLineTotal = (price: number, qty: number) => formatPrice(price * qty)
+
+const couponInput = ref('')
+const couponError = ref('')
+const isApplyingCoupon = ref(false)
+
+const handleApplyCoupon = async () => {
+  if (!couponInput.value.trim() || isApplyingCoupon.value) return
+  isApplyingCoupon.value = true
+  couponError.value = ''
+  
+  try {
+    await applyCoupon(couponInput.value.trim())
+    couponInput.value = ''
+  } catch (e: any) {
+    if (e.data && e.data.message) {
+      couponError.value = e.data.message
+    } else {
+      couponError.value = 'Code promo invalide'
+    }
+  } finally {
+    isApplyingCoupon.value = false
+  }
+}
+
+const handleRemoveCoupon = async () => {
+  if (isApplyingCoupon.value) return
+  isApplyingCoupon.value = true
+  couponError.value = ''
+  
+  try {
+    await removeCoupon()
+  } catch (e) {
+    console.error('Failed to remove coupon:', e)
+  } finally {
+    isApplyingCoupon.value = false
+  }
+}
 </script>
 
 <template>
@@ -65,18 +102,21 @@ const itemLineTotal = (price: number, qty: number) => formatPrice(price * qty)
           <!-- Items -->
           <div class="cart-items">
             <div v-for="{ cartItem, product } in cartProducts" :key="product!.id" class="cart-item">
-              <!-- Image -->
-              <NuxtLink :to="`/products/${product!.slug}`" class="item-img-link">
-                <img :src="product!.images[0]?.src || '/images/collection-lighting.png'" :alt="product!.name" class="item-img" />
-              </NuxtLink>
-
-              <!-- Info -->
-              <div class="item-info">
-                <span class="item-category">{{ product!.categoryId }}</span>
-                <NuxtLink :to="`/products/${product!.slug}`" class="item-name">{{ product!.name }}</NuxtLink>
-                <span class="item-sku">Réf: {{ product!.sku }}</span>
-                <!-- Mobile price -->
-                <span class="item-price-mobile">{{ formatPrice(product!.price) }}</span>
+              <!-- Main Product Info (Image + Details) -->
+              <div class="item-main">
+                <!-- Image -->
+                <NuxtLink :to="`/products/${product!.slug}`" class="item-img-link">
+                  <img :src="product!.images[0]?.src || '/images/collection-lighting.png'" :alt="product!.name" class="item-img" />
+                </NuxtLink>
+  
+                <!-- Info -->
+                <div class="item-info">
+                  <span class="item-category">{{ product!.categoryId }}</span>
+                  <NuxtLink :to="`/products/${product!.slug}`" class="item-name">{{ product!.name }}</NuxtLink>
+                  <span class="item-sku">Réf: {{ product!.sku }}</span>
+                  <!-- Mobile price -->
+                  <span class="item-price-mobile">{{ formatPrice(product!.price) }}</span>
+                </div>
               </div>
 
               <!-- Price (desktop) -->
@@ -122,15 +162,47 @@ const itemLineTotal = (price: number, qty: number) => formatPrice(price * qty)
                 <span>Sous-total</span>
                 <span class="summary-val">{{ formatPrice(subtotal) }}</span>
               </div>
+              <div class="summary-line summary-line--discount" v-if="discountTotal > 0">
+                <span>Remise {{ couponCode ? `(${couponCode})` : '' }}</span>
+                <span class="summary-val discount-val">-{{ formatPrice(discountTotal) }}</span>
+              </div>
               <div class="summary-line">
                 <span>Livraison</span>
                 <span :class="shippingTotal === 0 ? 'free' : ''">{{ shippingTotal === 0 ? 'Gratuite' : formatPrice(shippingTotal) }}</span>
               </div>
             </div>
 
-            <div v-if="subtotal < 5000" class="free-ship-note">
+            <div class="coupon-section">
+              <div v-if="couponCode && discountTotal > 0" class="coupon-applied">
+                <span class="coupon-applied-text">✓ Code promo : <strong>{{ couponCode }}</strong></span>
+                <button @click="handleRemoveCoupon" :disabled="isApplyingCoupon" class="coupon-remove-btn" aria-label="Supprimer le code promo">
+                  <X :size="14" />
+                </button>
+              </div>
+              <div v-else>
+                <div class="coupon-input-row">
+                  <input 
+                    v-model="couponInput" 
+                    type="text" 
+                    placeholder="Code promo" 
+                    class="coupon-input"
+                    @keyup.enter="handleApplyCoupon"
+                  />
+                  <button 
+                    @click="handleApplyCoupon" 
+                    :disabled="!couponInput || isApplyingCoupon"
+                    class="coupon-apply-btn"
+                  >
+                    {{ isApplyingCoupon ? '...' : 'Appliquer' }}
+                  </button>
+                </div>
+                <p v-if="couponError" class="coupon-error">{{ couponError }}</p>
+              </div>
+            </div>
+
+            <div v-if="subtotal < 50" class="free-ship-note">
               <Truck :size="14" />
-              <span>Plus que <strong>{{ formatPrice(5000 - subtotal) }}</strong> pour la livraison gratuite</span>
+              <span>Plus que <strong>{{ formatPrice(50 - subtotal) }}</strong> pour la livraison gratuite</span>
             </div>
 
             <div class="summary-total-row">
@@ -311,6 +383,19 @@ const itemLineTotal = (price: number, qty: number) => formatPrice(price * qty)
     gap: 1rem;
     flex-wrap: nowrap;
     padding: 1.5rem 0;
+  }
+}
+
+/* Item main wrapper */
+.item-main {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .item-main {
+    width: auto;
   }
 }
 
@@ -622,4 +707,112 @@ const itemLineTotal = (price: number, qty: number) => formatPrice(price * qty)
 }
 
 .trust-item svg { color: var(--dp-gold); }
+
+/* ─── Coupon Section ─── */
+.coupon-section {
+  margin: 1.25rem 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--dp-sand);
+}
+
+.coupon-input-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.coupon-input {
+  flex: 1;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--dp-sand);
+  background: var(--dp-white);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--dp-charcoal);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.coupon-input::placeholder {
+  color: var(--dp-ash);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.coupon-input:focus {
+  border-color: var(--dp-gold);
+}
+
+.coupon-apply-btn {
+  padding: 0.625rem 1.25rem;
+  background: var(--dp-charcoal);
+  color: var(--dp-white);
+  border: none;
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.coupon-apply-btn:hover { opacity: 0.85; }
+.coupon-apply-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.coupon-applied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.coupon-applied-text {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: #166534;
+}
+
+.coupon-applied-text strong {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.coupon-remove-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: none;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.coupon-remove-btn:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+}
+
+.coupon-error {
+  margin-top: 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: #dc2626;
+}
+
+.discount-val {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.summary-line--discount span:first-child {
+  color: #16a34a;
+}
 </style>

@@ -51,7 +51,7 @@ const selectedVariant = computed(() => {
     // Check fabric (if product has fabrics and one is selected)
     if (selectedFabric.value) {
       // We need to know which option key corresponds to fabric, color, dimension.
-      // Usually, Medusa option values are just strings, but if options are key-value:
+      // Usually, API option values are just strings, but if options are key-value:
       // For safety, we check if the variant's options object values contain our selection.
       // E.g., Object.values(opts).includes(selectedFabric.value)
       const hasFabric = Object.values(opts).some(val => 
@@ -78,6 +78,12 @@ const selectedVariant = computed(() => {
     
     return match
   }) || null
+})
+
+const displayPrice = computed(() => {
+  if (!product.value) return 0
+  const basePrice = selectedVariant.value?.price || product.value.price
+  return basePrice * quantity.value
 })
 
 const filledStars = computed(() => {
@@ -215,7 +221,7 @@ async function handleReviewSubmit() {
         <div class="product-info">
           <span class="product-category">{{ product.categories?.[0]?.name || product.categoryId || 'decor' }}</span>
           <h1 class="product-title">{{ product.name }}</h1>
-          <p class="product-price">{{ formatPrice(product.price) }}</p>
+          <p class="product-price">{{ formatPrice(displayPrice) }}</p>
           
           <p class="product-desc">{{ product.shortDescription || product.description }}</p>
 

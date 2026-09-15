@@ -34,7 +34,7 @@ function handleSearch() {
   }
 }
 
-// Bottom bar categories from Medusa API
+// Bottom bar categories from API API
 const dynamicCategories = computed(() => {
   const cats = [{ name: 'Tous les produits', icon: LayoutGrid, link: '/products' }]
   if (apiCategories.value) {

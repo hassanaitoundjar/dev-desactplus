@@ -65,9 +65,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       siteUrl: 'https://desactplus.ma',
-      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || '/api',
-      medusaApiUrl: process.env.NUXT_PUBLIC_MEDUSA_API_URL || 'http://localhost:9000',
-      medusaPublishableKey: process.env.NUXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8000/api',
+      storefrontApiKey: process.env.NUXT_PUBLIC_STOREFRONT_API_KEY || '',
     },
   },
 

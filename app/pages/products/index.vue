@@ -56,7 +56,7 @@ const filteredProducts = computed(() => {
       }
     }
 
-    // 1. Category Filter (using Medusa category IDs, categoryIds array, and handles)
+    // 1. Category Filter (using API category IDs, categoryIds array, and handles)
     if (selectedCategory.value !== 'all') {
       const catVal = selectedCategory.value.toLowerCase()
       const matchesId = p.categoryId === selectedCategory.value || (p.categoryIds && p.categoryIds.includes(selectedCategory.value))
@@ -70,7 +70,7 @@ const filteredProducts = computed(() => {
     if (selectedMaterials.value.length > 0) {
       // normalize e.g. "Bois massif" -> "bois", "Coton bouclette" -> "coton"
       const hasMaterial = selectedMaterials.value.some(selected => {
-        const normSelected = selected.toLowerCase().replace(/é/g, 'e').split(' ')[0]
+        const normSelected = selected.toLowerCase().replace(/é/g, 'e').split(' ')[0]!
         return p.materials?.some(mat => mat?.toLowerCase().includes(normSelected)) || 
                p.tags?.some(tag => tag?.toLowerCase().includes(normSelected))
       })
@@ -95,7 +95,7 @@ const filteredProducts = computed(() => {
     }
 
     // 5. Price Filter
-    if (p.price < priceRange.value[0] || p.price > priceRange.value[1]) {
+    if (p.price < priceRange.value[0]! || p.price > priceRange.value[1]!) {
       return false
     }
 
@@ -123,7 +123,7 @@ const sortedAndFilteredProducts = computed(() => {
 
 // ── Pagination ─────────────────────────────────────────
 const currentPage = ref(1)
-const perPage = ref(12)
+const perPage = ref(24)
 
 const totalPages = computed(() =>
   Math.max(1, Math.ceil(sortedAndFilteredProducts.value.length / perPage.value))

@@ -58,17 +58,15 @@ export function createApiClient(options: ApiClientOptions = {}) {
 export function useApiClient() {
   const config = useRuntimeConfig()
   
-  // Return a singleton-like instance bound to the runtime config
-  // For Medusa storefront, we generally point to the base URL and append `/store/...`
+  // For the storefront, we point to the base URL and append `/store/...`
   const headers: Record<string, string> = {}
   
-  // In Medusa 2.x, publishable API key might be required for storefront requests
-  if (config.public.medusaPublishableKey) {
-    headers['x-publishable-api-key'] = config.public.medusaPublishableKey as string
+  if (config.public.storefrontApiKey) {
+    headers['x-publishable-api-key'] = config.public.storefrontApiKey as string
   }
 
   return createApiClient({
-    baseURL: config.public.medusaApiUrl as string,
+    baseURL: config.public.apiBaseUrl as string,
     headers
   })
 }

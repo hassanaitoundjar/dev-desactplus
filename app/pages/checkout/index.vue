@@ -10,7 +10,7 @@ definePageMeta({ layout: 'default' })
 
 const router = useRouter()
 const { items, isEmpty, clear } = useCart()
-const { cartProducts, subtotal, shipping, total, completeCheckout } = useCheckout()
+const { cartProducts, subtotal, shipping, discountTotal, couponCode, total, completeCheckout } = useCheckout()
 
 // Redirect if empty
 onMounted(() => {
@@ -83,21 +83,20 @@ async function placeOrder() {
       itemCount: items.value.reduce((s, i) => s + i.quantity, 0),
     }
 
-    const order = await completeCheckout(shippingAddress, form.value.paymentMethod, form.value.email)
+    const order = await completeCheckout(shippingAddress, form.value.paymentMethod, form.value.email) as { id: string; display_id?: number }
     
-    if (!order?.id) {
+    if (!order || !order.id) {
       throw new Error('Commande non finalisée.')
     }
     
     const now = new Date()
-    const dateStr = now.toISOString().split('T')[0].replace(/-/g, '') // e.g. 20260914
-    let displayOrderId = order.id
+    const dateStr = now.toISOString().split('T')[0]!.replace(/-/g, '') // e.g. 20260914
+    let displayOrderId: string = order.id
     
     if (order.display_id) {
       displayOrderId = `DP-${dateStr}-${String(order.display_id).padStart(4, '0')}`
     } else {
-      // Fallback if display_id is not present
-      displayOrderId = `DP-${dateStr}-${order.id.slice(-6).toUpperCase()}`
+      displayOrderId = `DP-${dateStr}-${String(order.id).slice(-6).toUpperCase()}`
     }
     
     // Persist with the real orderId now that checkout succeeded
@@ -305,6 +304,10 @@ async function placeOrder() {
 
             <div class="sum-lines">
               <div class="sum-line"><span>Sous-total</span><span>{{ formatPrice(subtotal) }}</span></div>
+              <div v-if="discountTotal > 0" class="sum-line text-green-600">
+                <span>Remise {{ couponCode ? `(${couponCode})` : '' }}</span>
+                <span>-{{ formatPrice(discountTotal) }}</span>
+              </div>
               <div class="sum-line">
                 <span>Livraison</span>
                 <span :class="{ 'free-shipping-text': shipping === 0 }">{{ shipping === 0 ? 'Gratuite' : formatPrice(shipping) }}</span>

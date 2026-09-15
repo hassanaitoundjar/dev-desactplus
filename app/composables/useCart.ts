@@ -3,7 +3,7 @@ import { useCookie, useNuxtApp, useState } from '#imports'
 import { useApiClient } from '~/api/apiClient'
 
 interface CartItem {
-  id: string // line item id in Medusa
+  id: string // line item id in API
   productId?: string // for frontend mapping if needed
   variantId: string
   quantity: number
@@ -12,7 +12,7 @@ interface CartItem {
   thumbnail?: string
 }
 
-interface MedusaCart {
+interface APICart {
   id: string
   items: any[]
   subtotal: number
@@ -24,6 +24,8 @@ interface MedusaCart {
   payment_sessions?: any[]
   shipping_methods?: any[]
   region_id?: string
+  discount_total?: number
+  coupon_code?: string
 }
 
 const COOKIE_KEY = 'dp-cart-id'
@@ -32,7 +34,7 @@ export function useCart() {
   const cartIdCookie = useCookie<string | null>(COOKIE_KEY, { watch: true })
 
   // Use Nuxt's useState for globally shared reactive state across all components
-  const cart = useState<MedusaCart | null>('cart', () => null)
+  const cart = useState<APICart | null>('cart', () => null)
   const items = useState<CartItem[]>('cart-items', () => [])
   const isSyncing = useState<boolean>('cart-syncing', () => false)
 
@@ -41,16 +43,23 @@ export function useCart() {
   const count = computed(() => items.value.reduce((sum, item) => sum + item.quantity, 0))
   const isEmpty = computed(() => items.value.length === 0)
   
-  // Totals from Medusa
-  const cartTotal = computed(() => (cart.value?.total || 0) / 100) // Medusa uses cents
+  // Totals from API
   const subtotal = computed(() => (cart.value?.subtotal || 0) / 100)
-  const shippingTotal = computed(() => (cart.value?.shipping_total || 0) / 100)
+  const shippingTotal = computed(() => {
+    return (cart.value?.shipping_total || 0) / 100
+  })
+  const discountTotal = computed(() => (cart.value?.discount_total || 0) / 100)
+  const cartTotal = computed(() => {
+    const total = subtotal.value - discountTotal.value + shippingTotal.value
+    return Math.max(0, total)
+  })
+  const couponCode = computed(() => cart.value?.coupon_code || null)
 
   async function syncCart() {
     if (!cartIdCookie.value) return
     isSyncing.value = true
     try {
-      const response = await client.get<{ cart: MedusaCart }>(`/store/carts/${cartIdCookie.value}`)
+      const response = await client.get<{ cart: APICart }>(`/store/carts/${cartIdCookie.value}`)
       setCart(response.cart)
     } catch (error) {
       console.error('Failed to sync cart:', error)
@@ -62,22 +71,22 @@ export function useCart() {
     }
   }
 
-  function setCart(medusaCart: MedusaCart) {
-    cart.value = medusaCart
-    items.value = (medusaCart.items || []).map(item => ({
+  function setCart(apiCart: APICart) {
+    cart.value = apiCart
+    items.value = (apiCart.items || []).map(item => ({
       id: item.id,
       variantId: item.variant_id,
       productId: item.variant?.product_id,
       quantity: item.quantity,
       title: item.title,
-      price: item.unit_price / 100, // Medusa uses cents
+      price: item.unit_price / 100, // API uses cents
       thumbnail: item.thumbnail
     }))
   }
 
   async function createCart() {
     try {
-      const response = await client.post<{ cart: MedusaCart }>('/store/carts', {})
+      const response = await client.post<{ cart: APICart }>('/store/carts', {})
       cartIdCookie.value = response.cart.id
       setCart(response.cart)
       return response.cart
@@ -87,7 +96,7 @@ export function useCart() {
     }
   }
 
-  // Medusa explicitly requires a variantId to add to the cart
+  // API explicitly requires a variantId to add to the cart
   async function add(variantId: string, quantity = 1) {
     // Prevent duplicate concurrent add calls
     if (isSyncing.value) return
@@ -97,12 +106,17 @@ export function useCart() {
         await createCart()
       }
       
-      const response = await client.post<{ cart: MedusaCart }>(`/store/carts/${cartIdCookie.value}/line-items`, {
+      const response = await client.post<{ cart: APICart }>(`/store/carts/${cartIdCookie.value}/line-items`, {
         variant_id: variantId,
         quantity
       })
       setCart(response.cart)
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.status === 404 || error?.name === 'NotFoundError') {
+        cartIdCookie.value = null
+        isSyncing.value = false // release lock
+        return add(variantId, quantity)
+      }
       console.error('Failed to add to cart:', error)
     } finally {
       isSyncing.value = false
@@ -113,7 +127,7 @@ export function useCart() {
     if (!cartIdCookie.value) return
     isSyncing.value = true
     try {
-      const response = await client.delete<{ cart: MedusaCart }>(`/store/carts/${cartIdCookie.value}/line-items/${lineItemId}`)
+      const response = await client.delete<{ cart: APICart }>(`/store/carts/${cartIdCookie.value}/line-items/${lineItemId}`)
       setCart(response.cart)
     } catch (error) {
       console.error('Failed to remove from cart:', error)
@@ -128,7 +142,7 @@ export function useCart() {
     
     isSyncing.value = true
     try {
-      const response = await client.post<{ cart: MedusaCart }>(`/store/carts/${cartIdCookie.value}/line-items/${lineItemId}`, {
+      const response = await client.post<{ cart: APICart }>(`/store/carts/${cartIdCookie.value}/line-items/${lineItemId}`, {
         quantity
       })
       setCart(response.cart)
@@ -158,5 +172,56 @@ export function useCart() {
     })
   }
 
-  return { cart, items, count, cartTotal, subtotal, shippingTotal, isEmpty, isSyncing, add, remove, updateQuantity, clear, isInCart, syncCart }
+  async function applyCoupon(code: string) {
+    if (!cartIdCookie.value) return
+    isSyncing.value = true
+    try {
+      const response = await client.post<{ cart: APICart, message: string }>(`/store/carts/${cartIdCookie.value}/coupons`, {
+        coupon_code: code
+      })
+      setCart(response.cart)
+      return response.message
+    } catch (error: any) {
+      console.error('Failed to apply coupon:', error)
+      throw error
+    } finally {
+      isSyncing.value = false
+    }
+  }
+
+  async function removeCoupon() {
+    if (!cartIdCookie.value) return
+    isSyncing.value = true
+    try {
+      const response = await client.delete<{ cart: APICart, message: string }>(`/store/carts/${cartIdCookie.value}/coupons`)
+      setCart(response.cart)
+      return response.message
+    } catch (error: any) {
+      console.error('Failed to remove coupon:', error)
+      throw error
+    } finally {
+      isSyncing.value = false
+    }
+  }
+
+  return {
+    cart,
+    items,
+    isSyncing,
+    count,
+    isEmpty,
+    cartTotal,
+    subtotal,
+    shippingTotal,
+    discountTotal,
+    couponCode,
+    syncCart,
+    add,
+    updateQuantity,
+    remove,
+    clear,
+    isInCart,
+    applyCoupon,
+    removeCoupon
+  }
 }

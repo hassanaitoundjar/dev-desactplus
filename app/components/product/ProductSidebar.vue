@@ -7,13 +7,13 @@ import { useCategories } from '~/composables/useCategories'
 const { selectedCategory, selectedMaterials, selectedColors, inStockOnly, priceRange } = useProductFilters()
 const { categories: apiCategories } = useCategories()
 
-// Build category list dynamically from Medusa API data
+// Build category list dynamically from API API data
 const categories = computed(() => {
   const all = [{ label: 'Tous les produits', value: 'all' }]
   if (apiCategories.value) {
     all.push(...apiCategories.value.map(c => ({
       label: c.name,
-      value: c.id // use Medusa category ID for filtering
+      value: c.id // use API category ID for filtering
     })))
   }
   return all

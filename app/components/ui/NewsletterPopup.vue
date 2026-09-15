@@ -30,7 +30,6 @@ const closePopup = () => {
 const submitNewsletter = () => {
   if (email.value) {
     // In a real app, you would send this to your API
-    console.log('Subscribed:', email.value)
     closePopup()
   }
 }

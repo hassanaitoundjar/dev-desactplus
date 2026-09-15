@@ -24,12 +24,18 @@ function handleWishlist(e: Event) {
   toggleWishlist(props.product.id)
 }
 
-function handleAddToCart(e: Event) {
+const isAdded = ref(false)
+
+async function handleAddToCart(e: Event) {
   e.preventDefault()
   // Add first variant if available
   const variantId = props.product.variants?.[0]?.id
   if (variantId) {
-    addToCart(variantId, 1)
+    await addToCart(variantId, 1)
+    isAdded.value = true
+    setTimeout(() => {
+      isAdded.value = false
+    }, 2000)
   }
 }
 
@@ -129,7 +135,9 @@ function prevImage(e: Event) {
           <!-- Hover State Actions -->
           <div v-if="isHovered" class="pc-actions-hover">
             <button class="btn-add-cart" :disabled="!product.variants?.length" @click.prevent="handleAddToCart">
-              {{ product.variants?.length ? 'Add to cart' : 'Indisponible' }}
+              <span v-if="!product.variants?.length">Indisponible</span>
+              <span v-else-if="isAdded">Ajouté !</span>
+              <span v-else>Add to cart</span>
             </button>
             <button class="btn-icon" aria-label="Compare" @click.prevent>
               <ArrowLeftRight :size="16" />

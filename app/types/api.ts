@@ -37,6 +37,8 @@ export interface ApiProduct {
   title: string
   description: string
   short_description?: string
+  price?: number
+  compareAtPrice?: number
   categories?: { id: string, name: string, handle: string }[]
   collection_id?: string
   collection?: { id: string, title: string, handle: string }
