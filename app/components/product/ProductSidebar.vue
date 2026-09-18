@@ -4,6 +4,8 @@ import { ChevronDown } from 'lucide-vue-next'
 import { useProductFilters } from '~/composables/useProductFilters'
 import { useCategories } from '~/composables/useCategories'
 
+import { useRouter, useRoute } from 'vue-router'
+
 const { selectedCategory, selectedMaterials, selectedColors, inStockOnly, priceRange } = useProductFilters()
 const { categories: apiCategories } = useCategories()
 
@@ -92,8 +94,6 @@ function toggleColor(col: string) {
     selectedColors.value.push(col)
   }
 }
-
-import { useRouter, useRoute } from 'vue-router'
 const router = useRouter()
 const route = useRoute()
 
@@ -137,10 +137,10 @@ function updateCategory(val: string) {
         <div class="price-slider-container">
           <div class="slider-track-wrapper">
             <div class="slider-track">
-              <div class="slider-fill" :style="{ left: minPercent + '%', right: (100 - maxPercent) + '%' }"></div>
+              <div class="slider-fill" :style="{ left: minPercent + '%', right: (100 - maxPercent) + '%' }"/>
             </div>
-            <input type="range" :min="minAvailable" :max="maxAvailable" step="100" :value="priceRange[0]" @input="handleMinInput" class="range-input">
-            <input type="range" :min="minAvailable" :max="maxAvailable" step="100" :value="priceRange[1]" @input="handleMaxInput" class="range-input">
+            <input type="range" :min="minAvailable" :max="maxAvailable" step="100" :value="priceRange[0]" class="range-input" @input="handleMinInput">
+            <input type="range" :min="minAvailable" :max="maxAvailable" step="100" :value="priceRange[1]" class="range-input" @input="handleMaxInput">
           </div>
           <div class="price-range">
             <span>{{ priceRange[0] }} MAD</span>
@@ -165,8 +165,8 @@ function updateCategory(val: string) {
                 class="checkbox-input" 
                 :checked="selectedMaterials.includes(mat)"
                 @change="toggleMaterial(mat)"
-              />
-              <span class="checkbox-custom"></span>
+              >
+              <span class="checkbox-custom"/>
               {{ mat }}
             </label>
           </li>
@@ -190,7 +190,7 @@ function updateCategory(val: string) {
             :style="{ backgroundColor: color }"
             :aria-label="`Couleur ${color}`"
             @click="toggleColor(color)"
-          ></button>
+          />
         </div>
       </div>
     </div>
@@ -203,8 +203,8 @@ function updateCategory(val: string) {
       </button>
       <div v-show="openSections.disponibilite" class="section-content">
         <label class="checkbox-label">
-          <input type="checkbox" class="checkbox-input" v-model="inStockOnly" />
-          <span class="checkbox-custom"></span>
+          <input v-model="inStockOnly" type="checkbox" class="checkbox-input" >
+          <span class="checkbox-custom"/>
           En stock uniquement
         </label>
       </div>

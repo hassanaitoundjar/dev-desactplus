@@ -6,6 +6,8 @@ import { formatPrice } from '~/utils/formatPrice'
 import { useWishlist } from '~/composables/useWishlist'
 import { computed, ref } from 'vue'
 
+import { useCart } from '~/composables/useCart'
+
 const props = withDefaults(defineProps<{ 
   product: Product,
   layout?: 'grid' | 'list'
@@ -13,10 +15,8 @@ const props = withDefaults(defineProps<{
   layout: 'grid'
 })
 
-import { useCart } from '~/composables/useCart'
-
 const { toggle: toggleWishlist, isInWishlist } = useWishlist()
-const { add: addToCart } = useCart()
+const { add: addToCart, isOpen: isCartOpen } = useCart()
 const isWishlisted = computed(() => isInWishlist(props.product.id))
 
 function handleWishlist(e: Event) {
@@ -28,27 +28,24 @@ const isAdded = ref(false)
 
 async function handleAddToCart(e: Event) {
   e.preventDefault()
-  // Add first variant if available
   const variantId = props.product.variants?.[0]?.id
   if (variantId) {
     await addToCart(variantId, 1)
     isAdded.value = true
+    isCartOpen.value = true
     setTimeout(() => {
       isAdded.value = false
     }, 2000)
   }
 }
 
-// Fallback logic for category name and rating
 const categoryName = computed(() => {
   if (!props.product.categoryId) return 'Category'
-  // return props.product.categoryId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())\
   return props.product.categories?.[0]?.name || props.product.categoryId || 'decor'
 })
 
 const productRating = computed(() => props.product.rating || '4.5')
 
-// Calculate if discounted
 const isDiscounted = computed(() => props.product.compareAtPrice && props.product.compareAtPrice > props.product.price)
 const discountPercent = computed(() => {
   if (!isDiscounted.value) return 0
@@ -56,7 +53,6 @@ const discountPercent = computed(() => {
   return Math.round((diff / props.product.compareAtPrice!) * 100)
 })
 
-const isHovered = ref(false)
 const currentImageIndex = ref(0)
 const hasMultipleImages = computed(() => props.product.images && props.product.images.length > 1)
 
@@ -76,18 +72,14 @@ function prevImage(e: Event) {
 </script>
 
 <template>
-  <div 
-    :class="['pc-wrapper', `layout-${layout}`]"
-    @mouseenter="isHovered = true"
-    @mouseleave="isHovered = false"
-  >
+  <div :class="['pc-wrapper', `layout-${layout}`]">
     <!-- Top Badges and Heart -->
     <div class="pc-top-bar">
       <div class="pc-badges">
+        <span v-if="isDiscounted" class="pc-badge badge-discount">-{{ discountPercent }}%</span>
         <span v-if="product.isNew" class="pc-badge badge-new">NEW</span>
-        <span v-else-if="isDiscounted" class="pc-badge badge-discount">-{{ discountPercent }}%</span>
       </div>
-      <button class="pc-wishlist-btn" @click.prevent="handleWishlist" aria-label="Add to favorites">
+      <button class="pc-wishlist-btn" aria-label="Add to favorites" @click.prevent="handleWishlist">
         <Heart :size="18" stroke-width="1.5" :class="isWishlisted ? 'icon-active' : 'icon-default'" />
       </button>
     </div>
@@ -102,12 +94,12 @@ function prevImage(e: Event) {
         />
       </NuxtLink>
       
-      <!-- Image Carousel Arrows (show on hover if multiple images) -->
-      <button v-if="hasMultipleImages && isHovered" class="img-nav-btn prev" @click.prevent="prevImage">
-        <ChevronLeft :size="20" stroke-width="1.5" />
+      <!-- Image Carousel Arrows: always tappable on touch, hover-reveal on desktop via CSS -->
+      <button v-if="hasMultipleImages" class="img-nav-btn prev" aria-label="Previous image" @click.prevent="prevImage">
+        <ChevronLeft :size="18" stroke-width="1.5" />
       </button>
-      <button v-if="hasMultipleImages && isHovered" class="img-nav-btn next" @click.prevent="nextImage">
-        <ChevronRight :size="20" stroke-width="1.5" />
+      <button v-if="hasMultipleImages" class="img-nav-btn next" aria-label="Next image" @click.prevent="nextImage">
+        <ChevronRight :size="18" stroke-width="1.5" />
       </button>
     </div>
 
@@ -131,34 +123,24 @@ function prevImage(e: Event) {
       
       <!-- Bottom Actions Area (Swatches vs Add to Cart) -->
       <div class="pc-bottom-actions">
-        <Transition name="fade" mode="out-in">
-          <!-- Hover State Actions -->
-          <div v-if="isHovered" class="pc-actions-hover">
-            <button class="btn-add-cart" :disabled="!product.variants?.length" @click.prevent="handleAddToCart">
-              <span v-if="!product.variants?.length">Indisponible</span>
-              <span v-else-if="isAdded">Ajouté !</span>
-              <span v-else>Add to cart</span>
-            </button>
-            <button class="btn-icon" aria-label="Compare" @click.prevent>
-              <ArrowLeftRight :size="16" />
-            </button>
-            <button class="btn-icon" aria-label="Quick View" @click.prevent>
-              <Search :size="16" />
-            </button>
+        <div class="pc-actions-hover">
+          <button class="btn-add-cart" :disabled="!product.variants?.length" @click.prevent="handleAddToCart">
+            <span v-if="!product.variants?.length">Indisponible</span>
+            <span v-else-if="isAdded">Ajouté !</span>
+            <span v-else>Add to cart</span>
+          </button>
+        </div>
+        <div class="pc-colors-wrapper">
+          <div v-if="product.colors && product.colors.length > 0" class="pc-colors">
+            <span 
+              v-for="(color, index) in product.colors" 
+              :key="index"
+              class="pc-color-swatch"
+              :style="{ backgroundColor: color }"
+            />
           </div>
-          <!-- Default State Colors -->
-          <div v-else class="pc-colors-wrapper">
-            <div v-if="product.colors && product.colors.length > 0" class="pc-colors">
-              <span 
-                v-for="(color, index) in product.colors" 
-                :key="index"
-                class="pc-color-swatch"
-                :style="{ backgroundColor: color }"
-              ></span>
-            </div>
-            <div v-else class="pc-colors-empty"></div>
-          </div>
-        </Transition>
+          <div v-else class="pc-colors-empty"/>
+        </div>
       </div>
     </div>
   </div>
@@ -169,15 +151,18 @@ function prevImage(e: Event) {
   display: flex;
   flex-direction: column;
   width: 100%;
-  background-color: #ffffff;
-  border-radius: 8px;
-  padding: 16px;
+  min-width: 0;
   position: relative;
-  transition: box-shadow 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-color: var(--dp-white);
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
 }
 
 .pc-wrapper:hover {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
 }
 
 .pc-top-bar {
@@ -191,7 +176,9 @@ function prevImage(e: Event) {
 
 .pc-badges {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
 }
 
 .pc-badge {
@@ -204,18 +191,25 @@ function prevImage(e: Event) {
 }
 
 .badge-new {
-  background-color: #2e7d32; /* green */
+  background-color: #2e7d32;
 }
 
 .badge-discount {
-  background-color: #f38d53; /* orange */
+  background-color: #f38d53;
 }
 
+/* Larger tap target without shifting layout */
 .pc-wishlist-btn {
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 4px;
+  padding: 8px;
+  margin: -8px;
+  min-width: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #999;
   transition: color 0.2s;
 }
@@ -253,32 +247,56 @@ function prevImage(e: Event) {
   mix-blend-mode: multiply;
 }
 
+/* Visible/tappable by default (mobile); hover-reveal only on desktop */
 .img-nav-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: transparent;
+  background: rgba(255, 255, 255, 0.85);
   border: none;
-  color: #666;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
   cursor: pointer;
-  padding: 4px;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.2s ease, visibility 0.2s ease, background-color 0.2s ease;
+  z-index: 3;
 }
 
 .img-nav-btn:hover {
+  background: rgba(255, 255, 255, 1);
   color: #000;
 }
 
 .img-nav-btn.prev {
-  left: -8px;
+  left: 4px;
 }
 
 .img-nav-btn.next {
-  right: -8px;
+  right: 4px;
+}
+
+@media (min-width: 1024px) {
+  .img-nav-btn {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .pc-wrapper:hover .img-nav-btn {
+    opacity: 1;
+    visibility: visible;
+  }
 }
 
 .pc-info {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .pc-link {
@@ -286,22 +304,30 @@ function prevImage(e: Event) {
   color: inherit;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .pc-title-row {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 6px;
   margin-bottom: 4px;
 }
 
 .pc-title {
   font-family: var(--font-heading, sans-serif);
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #1a1a1a;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2D2A26;
   margin: 0;
   line-height: 1.2;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .pc-rating {
@@ -310,11 +336,12 @@ function prevImage(e: Event) {
   display: flex;
   align-items: center;
   gap: 2px;
+  flex-shrink: 0;
 }
 
 .pc-category {
-  font-size: 0.75rem;
-  color: #888;
+  font-size: 0.875rem;
+  color: #999;
   margin-bottom: 12px;
 }
 
@@ -326,14 +353,14 @@ function prevImage(e: Event) {
 }
 
 .pc-price-old {
-  font-size: 0.8rem;
-  color: #999;
+  font-size: 0.875rem;
+  color: #b3b3b3;
   text-decoration: line-through;
 }
 
 .pc-price-current {
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   color: #f38d53;
 }
 
@@ -341,12 +368,57 @@ function prevImage(e: Event) {
   min-height: 32px;
   display: flex;
   align-items: center;
+  position: relative;
+}
+
+.pc-actions-hover {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+@media (min-width: 480px) {
+  .pc-actions-hover {
+    gap: 8px;
+  }
 }
 
 .pc-colors-wrapper {
-  display: flex;
-  align-items: center;
-  height: 100%;
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .pc-actions-hover {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .pc-colors-wrapper {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+  }
+
+  .pc-wrapper:hover .pc-actions-hover {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .pc-wrapper:hover .pc-colors-wrapper {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 
 .pc-colors {
@@ -366,24 +438,20 @@ function prevImage(e: Event) {
   height: 12px;
 }
 
-.pc-actions-hover {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-}
-
 .btn-add-cart {
-  flex: 1;
+  width: 100%;
   background-color: #f38d53;
   color: white;
   border: none;
-  border-radius: 20px;
-  padding: 6px 12px;
-  font-size: 0.8rem;
+  border-radius: 9999px;
+  padding: 10px 16px;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .btn-add-cart:hover:not(:disabled) {
@@ -411,18 +479,7 @@ function prevImage(e: Event) {
   color: #000;
 }
 
-/* Animations */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-/* List Layout Modifications (if needed) */
+/* List Layout */
 .layout-list {
   flex-direction: row;
   align-items: center;
@@ -436,5 +493,60 @@ function prevImage(e: Event) {
 
 .layout-list .pc-info {
   flex: 1;
+}
+
+@media (max-width: 640px) {
+  .layout-list {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .layout-list .pc-image-container {
+    width: 100%;
+  }
+}
+
+/* Tighter mobile grid cards (2-col) */
+@media (max-width: 480px) {
+  .pc-wrapper {
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .pc-image-container {
+    margin-bottom: 10px;
+  }
+
+  .pc-title {
+    font-size: 0.85rem;
+  }
+
+  .pc-category {
+    font-size: 0.75rem;
+    margin-bottom: 8px;
+  }
+
+  .pc-price-row {
+    margin-bottom: 8px;
+  }
+
+  .pc-price-current {
+    font-size: 0.9rem;
+  }
+
+  .pc-price-old {
+    font-size: 0.75rem;
+  }
+
+  .btn-add-cart {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+
+  .pc-badge {
+    font-size: 0.6rem;
+    padding: 3px 6px;
+  }
 }
 </style>

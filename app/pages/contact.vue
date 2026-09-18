@@ -37,7 +37,7 @@ async function submit() {
     
     <!-- Image Side -->
     <div class="contact-visual">
-      <img src="/images/collection-salon.png" alt="Desact Plus Showroom" class="contact-img" />
+      <img src="/images/collection-salon.png" alt="Desact Plus Showroom" class="contact-img" >
       <div class="contact-overlay">
         <h2 class="overlay-text">L'élégance à votre écoute</h2>
       </div>
@@ -57,45 +57,45 @@ async function submit() {
         <div class="info-item">
           <h4>Showroom</h4>
           <address>
-            Quartier Racine<br />
-            Casablanca, Maroc<br />
+            Quartier Racine<br >
+            Casablanca, Maroc<br >
             (Sur rendez-vous uniquement)
           </address>
         </div>
         <div class="info-item">
           <h4>Contact</h4>
           <p>
-            +212 (0) 5 22 XX XX XX<br />
+            +212 (0) 5 22 XX XX XX<br >
             contact@desactplus.com
           </p>
         </div>
       </div>
 
-      <form v-if="status !== 'success'" @submit.prevent="submit" class="modern-form">
+      <form v-if="status !== 'success'" class="modern-form" @submit.prevent="submit">
         <div class="form-row">
           <div class="input-group">
-            <input id="name" v-model="form.name" type="text" class="modern-input" placeholder=" " required />
+            <input id="name" v-model="form.name" type="text" class="modern-input" placeholder=" " required >
             <label for="name" class="floating-label">Nom complet <span class="required-star">*</span></label>
           </div>
           <div class="input-group">
-            <input id="email" v-model="form.email" type="email" class="modern-input" placeholder=" " required />
+            <input id="email" v-model="form.email" type="email" class="modern-input" placeholder=" " required >
             <label for="email" class="floating-label">Email <span class="required-star">*</span></label>
           </div>
         </div>
         
         <div class="form-row">
           <div class="input-group">
-            <input id="phone" v-model="form.phone" type="tel" class="modern-input" placeholder=" " />
+            <input id="phone" v-model="form.phone" type="tel" class="modern-input" placeholder=" " >
             <label for="phone" class="floating-label">Téléphone</label>
           </div>
           <div class="input-group">
-            <input id="subject" v-model="form.subject" type="text" class="modern-input" placeholder=" " required />
+            <input id="subject" v-model="form.subject" type="text" class="modern-input" placeholder=" " required >
             <label for="subject" class="floating-label">Sujet <span class="required-star">*</span></label>
           </div>
         </div>
         
         <div class="input-group">
-          <textarea id="message" v-model="form.message" class="modern-textarea" placeholder=" " rows="4" required></textarea>
+          <textarea id="message" v-model="form.message" class="modern-textarea" placeholder=" " rows="4" required/>
           <label for="message" class="floating-label">Votre message <span class="required-star">*</span></label>
         </div>
         

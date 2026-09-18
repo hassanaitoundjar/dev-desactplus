@@ -32,7 +32,7 @@ async function subscribe() {
       Inscrivez-vous à notre newsletter pour recevoir nos nouveautés, invitations exclusives et inspirations design.
     </p>
 
-    <form v-if="status !== 'success'" @submit.prevent="subscribe" class="newsletter-form">
+    <form v-if="status !== 'success'" class="newsletter-form" @submit.prevent="subscribe">
       <div class="newsletter-input-group">
         <input
           v-model="email"
@@ -40,7 +40,7 @@ async function subscribe() {
           placeholder="Votre adresse email"
           required
           class="newsletter-input"
-        />
+        >
       </div>
       <BaseButton type="submit" variant="primary" :loading="status === 'loading'">
         S'inscrire <ArrowRight :size="16" />

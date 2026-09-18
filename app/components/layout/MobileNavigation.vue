@@ -22,7 +22,7 @@ function toggleGroup(title: string) {
           <NuxtLink to="/" class="mobile-menu-logo" @click="closeMobileMenu">
             DESACT
           </NuxtLink>
-          <button class="mobile-menu-close" @click="closeMobileMenu" aria-label="Fermer le menu">
+          <button class="mobile-menu-close" aria-label="Fermer le menu" @click="closeMobileMenu">
             <X :size="32" stroke-width="1" />
           </button>
         </div>
@@ -47,8 +47,8 @@ function toggleGroup(title: string) {
               <div v-else class="mobile-accordion">
                 <button
                   class="mobile-accordion-btn"
-                  @click="toggleGroup(link.label)"
                   :class="{ 'active': openGroup === link.label }"
+                  @click="toggleGroup(link.label)"
                 >
                   <span class="mobile-link-text">{{ link.label }}</span>
                   <ChevronDown class="mobile-accordion-icon" :size="24" stroke-width="1.5" />

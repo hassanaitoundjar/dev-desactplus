@@ -10,18 +10,19 @@ import { useCart } from '~/composables/useCart'
 import { useWishlist } from '~/composables/useWishlist'
 import { formatPrice } from '~/utils/formatPrice'
 import { useCategories } from '~/composables/useCategories'
+import CartDrawer from './CartDrawer.vue'
+
+import { useProductFilters } from '~/composables/useProductFilters'
+import { useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
 
 const { toggleMobileMenu } = useNavigation()
-const { count: cartCount, cartTotal } = useCart()
+const { count: cartCount, cartTotal, isOpen: isCartOpen } = useCart()
 const { count: wishlistCount } = useWishlist()
 const { categories: apiCategories } = useCategories()
 
 // Compare count (mock for now)
 const compareCount = 0
-
-import { useProductFilters } from '~/composables/useProductFilters'
-import { useRouter } from 'vue-router'
-import { ref, computed } from 'vue'
 
 const { searchQuery } = useProductFilters()
 const router = useRouter()
@@ -55,7 +56,7 @@ const dynamicCategories = computed(() => {
     <div class="header-top container-site">
       
       <!-- Mobile Menu Toggle (Left on mobile) -->
-      <button class="header-menu-btn desktop-hide" @click="toggleMobileMenu" aria-label="Menu">
+      <button class="header-menu-btn desktop-hide" aria-label="Menu" @click="toggleMobileMenu">
         <Menu :size="24" :stroke-width="1.5" />
       </button>
 
@@ -69,12 +70,12 @@ const dynamicCategories = computed(() => {
       <div class="header-search">
         <Search :size="18" :stroke-width="1.5" class="search-icon" />
         <input 
+          v-model="localSearch" 
           type="text" 
           placeholder="Search for products" 
-          class="search-input" 
-          v-model="localSearch"
+          class="search-input"
           @keyup.enter="handleSearch"
-        />
+        >
       </div>
 
       <!-- Right Actions -->
@@ -84,8 +85,8 @@ const dynamicCategories = computed(() => {
         <!-- Wishlist -->
         <NuxtLink to="/wishlist" class="action-circle">
           <Heart :size="18" :stroke-width="1.5" />
-          <span class="action-badge" v-if="wishlistCount > 0">{{ wishlistCount }}</span>
-          <span class="action-badge" v-else>0</span>
+          <span v-if="wishlistCount > 0" class="action-badge">{{ wishlistCount }}</span>
+          <span v-else class="action-badge">0</span>
         </NuxtLink>
 
         <!-- Login / Register -->
@@ -95,12 +96,12 @@ const dynamicCategories = computed(() => {
         </NuxtLink>
 
         <!-- Cart -->
-        <NuxtLink to="/cart" class="action-pill action-pill-dark">
+        <button class="action-pill action-pill-dark" @click="isCartOpen = true">
           <ShoppingCart :size="18" :stroke-width="1.5" />
           <span>{{ formatPrice(cartTotal) }}</span>
-          <span class="action-badge-cart" v-if="cartCount > 0">{{ cartCount }}</span>
-          <span class="action-badge-cart" v-else>0</span>
-        </NuxtLink>
+          <span v-if="cartCount > 0" class="action-badge-cart">{{ cartCount }}</span>
+          <span v-else class="action-badge-cart">0</span>
+        </button>
       </div>
     </div>
 
@@ -120,6 +121,9 @@ const dynamicCategories = computed(() => {
 
     <!-- Mobile Navigation Drawer -->
     <MobileNavigation />
+    
+    <!-- Cart Drawer -->
+    <CartDrawer />
   </header>
 </template>
 

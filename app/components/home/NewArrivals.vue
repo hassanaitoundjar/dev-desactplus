@@ -94,13 +94,13 @@ const { newest } = useProducts()
 
 .na-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-6);
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
 }
 
 @media (min-width: 640px) {
   .na-grid {
-    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-6);
   }
 }
 

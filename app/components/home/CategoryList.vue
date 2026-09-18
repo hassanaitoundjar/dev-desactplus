@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import Container from '../ui/Container.vue'
+import BaseButton from '../ui/BaseButton.vue'
 import { useCategories } from '~/composables/useCategories'
+import { ref } from 'vue'
 
 const { categories } = useCategories()
+const showAll = ref(false)
 </script>
 
 <template>
@@ -13,16 +16,22 @@ const { categories } = useCategories()
         <p class="cl-desc">Lots of new products and product collections</p>
       </div>
 
-      <div class="cl-grid">
+      <div class="cl-grid" :class="{ 'show-all': showAll }">
         <NuxtLink 
           v-for="cat in categories" 
           :key="cat.slug"
           :to="`/products?category=${cat.id}`"
           class="cl-card"
         >
-          <img :src="cat.image" :alt="cat.name" class="cl-image" loading="lazy" />
+          <img :src="cat.image" :alt="cat.name" class="cl-image" loading="lazy" >
           <div class="cl-pill">{{ cat.name }}</div>
         </NuxtLink>
+      </div>
+
+      <div v-if="categories && categories.length > 6" class="cl-actions">
+        <button class="btn-list" @click="showAll = !showAll">
+          {{ showAll ? 'Show Less' : 'Show More' }}
+        </button>
       </div>
     </Container>
   </section>
@@ -61,6 +70,34 @@ const { categories } = useCategories()
   gap: 1.5rem;
 }
 
+.btn-list {
+  width: 50%;
+  background-color: #f38d53;
+  color: white;
+  border: none;
+  border-radius: 9999px;
+  padding: 10px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-list:hover {
+  background-color: var(--dp-charcoal);
+  color: var(--dp-white);
+}
+
+/* Hide items after 6th on mobile if not showing all */
+@media (max-width: 639px) {
+  .cl-grid:not(.show-all) .cl-card:nth-child(n+7) {
+    display: none;
+  }
+}
+
 @media (min-width: 640px) {
   .cl-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -72,6 +109,19 @@ const { categories } = useCategories()
   .cl-grid {
     grid-template-columns: repeat(5, 1fr);
     gap: 2rem;
+  }
+}
+
+.cl-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  padding: 0 1rem;
+}
+
+@media (min-width: 640px) {
+  .cl-actions {
+    display: none;
   }
 }
 

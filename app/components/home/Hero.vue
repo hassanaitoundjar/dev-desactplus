@@ -73,6 +73,29 @@ function resetAutoPlay() {
   startAutoPlay()
 }
 
+// Touch swipe support for mobile
+let touchStartX = 0
+let touchEndX = 0
+
+function handleTouchStart(e: TouchEvent) {
+  touchStartX = e.changedTouches[0].screenX
+}
+
+function handleTouchEnd(e: TouchEvent) {
+  touchEndX = e.changedTouches[0].screenX
+  handleSwipe()
+}
+
+function handleSwipe() {
+  const minSwipeDistance = 50
+  if (touchEndX < touchStartX - minSwipeDistance) {
+    nextSlide() // Swiped left -> Next slide
+  }
+  if (touchEndX > touchStartX + minSwipeDistance) {
+    prevSlide() // Swiped right -> Prev slide
+  }
+}
+
 onMounted(() => {
   startAutoPlay()
 })
@@ -83,11 +106,15 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section class="hero-slider">
-    <button class="nav-arrow left" @click="prevSlide" aria-label="Previous slide">
+  <section 
+    class="hero-slider" 
+    @touchstart="handleTouchStart" 
+    @touchend="handleTouchEnd"
+  >
+    <button class="nav-arrow left" aria-label="Previous slide" @click="prevSlide">
       <ArrowLeft :size="18" stroke-width="1.5" />
     </button>
-    <button class="nav-arrow right" @click="nextSlide" aria-label="Next slide">
+    <button class="nav-arrow right" aria-label="Next slide" @click="nextSlide">
       <ArrowRight :size="18" stroke-width="1.5" />
     </button>
 
@@ -110,7 +137,7 @@ onBeforeUnmount(() => {
               <path d="M50,120 C70,60 130,60 150,120" stroke="#fff" stroke-opacity="0.3" stroke-width="6" stroke-linecap="round" />
               <path d="M80,140 C90,100 110,100 120,140" stroke="#fff" stroke-opacity="0.3" stroke-width="6" stroke-linecap="round" />
             </svg>
-            <div class="bg-dots"></div>
+            <div class="bg-dots"/>
           </div>
 
           <Container class="slide-container">
@@ -164,8 +191,8 @@ onBeforeUnmount(() => {
           :key="index"
           class="dot"
           :class="{ active: currentSlide === index }"
-          @click="setSlide(index)"
           :aria-label="`Go to slide ${index + 1}`"
+          @click="setSlide(index)"
         />
       </div>
     </div>

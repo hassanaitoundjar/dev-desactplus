@@ -39,7 +39,7 @@ watch(searchOpen, (isOpen) => {
               type="text"
               placeholder="Rechercher un produit, une collection..."
               class="search-input"
-            />
+            >
           </div>
         </div>
 
@@ -64,7 +64,7 @@ watch(searchOpen, (isOpen) => {
                 @click="closeSearch"
               >
                 <div class="search-product-image">
-                  <img :src="product.images[0].src" :alt="product.name" />
+                  <img :src="product.images[0].src" :alt="product.name" >
                 </div>
                 <div class="search-product-info">
                   <h4 class="search-product-name">{{ product.name }}</h4>

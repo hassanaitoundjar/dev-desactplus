@@ -16,9 +16,9 @@ const { featured } = useCategories()
         <div class="fc-text-column">
           <span class="fc-subtitle">COLLECTIONS</span>
           <h2 class="fc-title">
-            Des univers,<br/>une signature.
+            Des univers,<br>une signature.
           </h2>
-          <span class="fc-divider"></span>
+          <span class="fc-divider"/>
           <NuxtLink to="/collections" class="fc-link">
             Voir toutes les collections
             <ArrowRight class="fc-link-icon" />

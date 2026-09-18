@@ -184,15 +184,15 @@ watch(
     <!-- Hero Banner -->
     <section class="plp-hero">
       <div class="plp-hero-bg">
-        <img src="/images/bathrom.jpeg" alt="" class="plp-hero-img" onerror="this.style.display='none'" />
-        <div class="plp-hero-gradient"></div>
+        <img src="/images/bathrom.jpeg" alt="" class="plp-hero-img" onerror="this.style.display='none'" >
+        <div class="plp-hero-gradient"/>
       </div>
       <div class="container-site plp-hero-inner">
         <div class="plp-hero-content">
           <span class="plp-hero-subtitle">COLLECTIONS</span>
           <h1 class="plp-hero-title">Nos produits</h1>
           <p class="plp-hero-desc">
-            Des pièces sélectionnées avec soin, alliant design<br/>
+            Des pièces sélectionnées avec soin, alliant design<br>
             contemporain, confort et qualité incomparable.
           </p>
         </div>
@@ -221,7 +221,7 @@ watch(
             <div class="toolbar-sort">
               <label for="sort-select" class="sort-label">Trier par :</label>
               <div class="sort-select-wrapper">
-                <select id="sort-select" class="sort-select" v-model="sortBy">
+                <select id="sort-select" v-model="sortBy" class="sort-select">
                   <option value="default">Popularité</option>
                   <option value="newest">Nouveautés</option>
                   <option value="price-asc">Prix croissant</option>
@@ -234,16 +234,16 @@ watch(
               <button 
                 class="view-btn" 
                 :class="{ active: viewMode === 'grid' }"
-                @click="viewMode = 'grid'"
                 aria-label="Vue grille"
+                @click="viewMode = 'grid'"
               >
                 <Grid :size="18" />
               </button>
               <button 
                 class="view-btn" 
                 :class="{ active: viewMode === 'list' }"
-                @click="viewMode = 'list'"
                 aria-label="Vue liste"
+                @click="viewMode = 'list'"
               >
                 <List :size="18" />
               </button>

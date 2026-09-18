@@ -3,22 +3,20 @@ import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useSeo, useBreadcrumbs } from '~/composables/useSeo'
 import Container from '~/components/ui/Container.vue'
-import BaseButton from '~/components/ui/BaseButton.vue'
-import BaseImage from '~/components/ui/BaseImage.vue'
 import ProductCard from '~/components/product/ProductCard.vue'
 import { useProduct } from '~/composables/useProduct'
 import { useCart } from '~/composables/useCart'
 import { useWishlist } from '~/composables/useWishlist'
 import { useReviews } from '~/composables/useReviews'
 import { formatPrice } from '~/utils/formatPrice'
-import { Heart, ShoppingCart, Truck, ShieldCheck, Headset, Shield, ChevronDown, User, Star } from 'lucide-vue-next'
+import { Heart, Truck, ShieldCheck, Headset, Shield, User, ArrowLeftRight, Activity } from 'lucide-vue-next'
 
 definePageMeta({ layout: 'shop' })
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 const { product, related, pending, error } = useProduct(slug)
-const { add: addToCart } = useCart()
+const { add: addToCart, isOpen: isCartOpen } = useCart()
 const { toggle: toggleWishlist, isInWishlist } = useWishlist()
 const { reviews, summary, isLoading: reviewsLoading, isSubmitting, error: reviewsError, fetchReviews, submitReview, hasReviews } = useReviews()
 
@@ -86,10 +84,7 @@ const displayPrice = computed(() => {
   return basePrice * quantity.value
 })
 
-const filledStars = computed(() => {
-  const rating = product.value?.rating || 0
-  return Math.round(rating)
-})
+
 
 const tabs = computed(() => [
   { id: 'description', label: 'DESCRIPTION' },
@@ -107,7 +102,7 @@ watch(product, async (p) => {
     if (p.colors?.length) selectedColor.value = p.colors[0] || ''
     if (p.dimensions?.length) selectedDimension.value = p.dimensions[0]?.value || ''
     
-    await fetchReviews(p.id)
+    await fetchReviews(p.slug)
     
     useSeo({
       title: p.name,
@@ -129,10 +124,18 @@ const isAddedToCart = ref(false)
 function handleAddToCart() {
   if (product.value && selectedVariant.value) {
     addToCart(selectedVariant.value.id, quantity.value)
+    isCartOpen.value = true
     isAddedToCart.value = true
     setTimeout(() => {
       isAddedToCart.value = false
     }, 2000)
+  }
+}
+
+function handleBuyNow() {
+  if (product.value && selectedVariant.value) {
+    addToCart(selectedVariant.value.id, quantity.value)
+    useRouter().push('/checkout')
   }
 }
 
@@ -149,6 +152,7 @@ function handleSwatchClick(type: 'fabric' | 'color', index: number, val: string)
 const showReviewForm = ref(false)
 const reviewForm = ref({
   authorName: '',
+  email: '',
   rating: 5,
   title: '',
   content: ''
@@ -156,11 +160,12 @@ const reviewForm = ref({
 
 async function handleReviewSubmit() {
   if (!product.value) return
-  const success = await submitReview(product.value.id, { ...reviewForm.value })
+  const success = await submitReview(product.value.slug, { ...reviewForm.value })
   if (success) {
     showReviewForm.value = false
     reviewForm.value = {
       authorName: '',
+      email: '',
       rating: 5,
       title: '',
       content: ''
@@ -203,7 +208,7 @@ async function handleReviewSubmit() {
               :class="{ active: activeImage === idx }"
               @click="setImage(idx)"
             >
-              <img :src="img.src" :alt="img.alt" class="thumbnail-img" />
+              <img :src="img.src" :alt="img.alt" class="thumbnail-img" >
             </button>
           </div>
           <div class="gallery-main">
@@ -213,17 +218,43 @@ async function handleReviewSubmit() {
               :src="currentImage.src"
               :alt="currentImage.alt"
               class="main-img"
-            />
+            >
           </div>
         </div>
 
         <!-- Product Info -->
         <div class="product-info">
-          <span class="product-category">{{ product.categories?.[0]?.name || product.categoryId || 'decor' }}</span>
-          <h1 class="product-title">{{ product.name }}</h1>
-          <p class="product-price">{{ formatPrice(displayPrice) }}</p>
           
-          <p class="product-desc">{{ product.shortDescription || product.description }}</p>
+          <div class="product-header-flex">
+            <h1 class="product-title">{{ product.name }}</h1>
+            <div class="product-brand-box">
+              <span class="brand-name capitalize">{{ product.categories?.[0]?.name }}</span>
+            </div>
+          </div>
+
+          <div class="product-sku-rating">
+            <div class="sku-text"><strong>SKU:</strong> {{ product.sku || 'N/A' }}</div>
+            <div class="rating-info">
+              <div class="review-stars-small">
+                <span v-for="n in 5" :key="n" class="star" :class="{ filled: n <= Math.round(summary?.averageRating || product.rating || 5) }">★</span>
+              </div>
+              <span class="reviews-count">({{ summary?.totalReviews ?? product.reviewsCount ?? 2 }} customer reviews)</span>
+            </div>
+          </div>
+
+          <div v-if="product.collectionId || true" class="product-promo-box">
+            <div class="promo-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m15 9-6 6"/><path d="M9 9h.01"/><path d="M15 15h.01"/></svg>
+            </div>
+            <div class="promo-content">
+              <h3 class="promo-title capitalize">{{ product.collectionId || 'Soft Edge' }} collection</h3>
+              <p class="promo-text">Hurry and get discounts up to 20% <a href="#">Read more</a></p>
+            </div>
+          </div>
+
+          <div class="product-desc" v-html="product.shortDescription || product.description"></div>
+
+          <p class="product-price">{{ formatPrice(displayPrice) }}</p>
 
           <div class="product-options">
             
@@ -273,30 +304,29 @@ async function handleReviewSubmit() {
               </div>
             </div>
 
-            <!-- Quantity Selector -->
-            <div class="option-group">
-              <span class="option-label">QUANTITÉ</span>
-              <div class="quantity-selector">
-                <button class="qty-btn" @click="quantity > 1 ? quantity-- : null">-</button>
-                <span class="qty-val">{{ quantity }}</span>
-                <button class="qty-btn" @click="quantity++">+</button>
-              </div>
+
+
+          </div>
+
+          <!-- Actions Row -->
+          <div class="product-actions-row">
+            <div class="quantity-selector-box">
+              <button class="qty-btn" @click="quantity > 1 ? quantity-- : null">-</button>
+              <div class="qty-divider"></div>
+              <span class="qty-val">{{ quantity }}</span>
+              <div class="qty-divider"></div>
+              <button class="qty-btn" @click="quantity++">+</button>
             </div>
-
-          </div>
-
-          <!-- Actions -->
-          <div class="product-actions">
-            <button class="btn-primary" :disabled="!selectedVariant" @click="handleAddToCart">
-              <span v-if="!selectedVariant">INDISPONIBLE</span>
-              <span v-else>{{ isAddedToCart ? 'AJOUTÉ AU PANIER' : 'AJOUTER AU PANIER' }}</span>
-              <ShoppingCart v-if="selectedVariant" :size="18" />
+            <button class="btn-add-cart" :disabled="!selectedVariant" @click="handleAddToCart">
+              <span v-if="!selectedVariant">Out of stock</span>
+              <span v-else>{{ isAddedToCart ? 'Added' : 'Add to cart' }}</span>
             </button>
-            <button class="btn-secondary" @click="product && toggleWishlist(product.id)">
-              AJOUTER À LA WISHLIST
-              <Heart :size="18" :fill="isWishlisted ? 'currentColor' : 'none'" />
+            <button class="btn-buy-now" :disabled="!selectedVariant" @click="handleBuyNow">
+              Buy now
             </button>
           </div>
+          
+         
 
           <!-- Trust Badges -->
           <div class="product-trust-badges">
@@ -335,22 +365,22 @@ async function handleReviewSubmit() {
         </div>
         
         <!-- Description Tab -->
-        <div class="tab-content" v-show="activeTab === 'description'">
+        <div v-show="activeTab === 'description'" class="tab-content">
           <div class="desc-layout">
             <div class="desc-text">
-              <p class="desc-intro">{{ product.description }}</p>
+              <div class="desc-intro" v-html="product.description"></div>
               <ul class="desc-features">
                 <li v-for="tag in product.tags" :key="tag" class="capitalize">{{ tag }}</li>
               </ul>
             </div>
             <div v-if="product.images.length > 1" class="desc-image">
-              <img :src="product.images[1]?.src || product.images[0]?.src || ''" :alt="product.name" class="desc-img" />
+              <img :src="product.images[1]?.src || product.images[0]?.src || ''" :alt="product.name" class="desc-img" >
             </div>
           </div>
         </div>
 
         <!-- Details Tab -->
-        <div class="tab-content" v-show="activeTab === 'details'">
+        <div v-show="activeTab === 'details'" class="tab-content">
           <div class="details-grid">
             <div class="detail-row">
               <span class="detail-label">Référence (SKU)</span>
@@ -360,10 +390,10 @@ async function handleReviewSubmit() {
               <span class="detail-label">Catégorie</span>
               <span class="detail-value capitalize">{{ product.categories?.[0]?.name || product.categoryId || 'decor' }}</span>
             </div>
-            <div v-if="product.collectionId" class="detail-row">
+            <!-- <div v-if="product.collectionId" class="detail-row">
               <span class="detail-label">Collection</span>
               <span class="detail-value capitalize">{{ product.collectionId }}</span>
-            </div>
+            </div> -->
             <div v-if="product.dimensions?.length" class="detail-row">
               <span class="detail-label">Dimensions disponibles</span>
               <span class="detail-value">{{ product.dimensions.map(d => d.label).join(' · ') }}</span>
@@ -376,15 +406,15 @@ async function handleReviewSubmit() {
               <span class="detail-label">Disponibilité</span>
               <span class="detail-value" :class="product.available ? 'status-in-stock' : 'status-out-of-stock'">{{ product.available ? 'En stock' : 'Rupture de stock' }}</span>
             </div>
-            <div class="detail-row">
+            <!-- <div class="detail-row">
               <span class="detail-label">Date d'ajout</span>
               <span class="detail-value">{{ new Date(product.createdAt).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }) }}</span>
-            </div>
+            </div> -->
           </div>
         </div>
 
         <!-- Materials Tab -->
-        <div class="tab-content" v-show="activeTab === 'materiaux'">
+        <div v-show="activeTab === 'materiaux'" class="tab-content">
           <div class="desc-text">
             <p class="desc-intro">Ce produit est conçu avec des matériaux soigneusement sélectionnés pour leur qualité et leur durabilité.</p>
             <div class="materials-grid">
@@ -397,7 +427,7 @@ async function handleReviewSubmit() {
         </div>
 
         <!-- Livraison Tab -->
-        <div class="tab-content" v-show="activeTab === 'livraison'">
+        <div v-show="activeTab === 'livraison'" class="tab-content">
           <div class="desc-text">
             <p class="desc-intro">Nous livrons partout au Maroc avec le plus grand soin pour vos meubles.</p>
             <ul class="desc-features">
@@ -411,7 +441,7 @@ async function handleReviewSubmit() {
         </div>
 
         <!-- Reviews Tab -->
-        <div class="tab-content" v-show="activeTab === 'avis'">
+        <div v-show="activeTab === 'avis'" class="tab-content">
           <div v-if="reviewsLoading" class="loading-state">Chargement des avis...</div>
           <div v-else-if="reviewsError" class="error-state">{{ reviewsError }}</div>
           <div v-else>
@@ -435,7 +465,7 @@ async function handleReviewSubmit() {
             
             <div v-else class="reviews-empty">
               <p class="desc-intro">Aucun avis pour le moment. Soyez le premier à donner votre avis !</p>
-              <button class="btn-primary mt-4" style="width: auto; padding: 0.75rem 1.5rem;" @click="showReviewForm = true" v-if="!showReviewForm">
+              <button v-if="!showReviewForm" class="btn-primary mt-4" style="width: auto; padding: 0.75rem 1.5rem;" @click="showReviewForm = true">
                 DONNER MON AVIS
               </button>
             </div>
@@ -445,7 +475,11 @@ async function handleReviewSubmit() {
               <h3 class="form-title">Votre avis</h3>
               <div class="form-group">
                 <label>Nom</label>
-                <input v-model="reviewForm.authorName" type="text" required placeholder="Votre nom complet" />
+                <input v-model="reviewForm.authorName" type="text" required placeholder="Votre nom complet" >
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input v-model="reviewForm.email" type="email" required placeholder="Votre adresse email" >
               </div>
               <div class="form-group">
                 <label>Note</label>
@@ -455,11 +489,11 @@ async function handleReviewSubmit() {
               </div>
               <div class="form-group">
                 <label>Titre (facultatif)</label>
-                <input v-model="reviewForm.title" type="text" placeholder="Résumez votre avis" />
+                <input v-model="reviewForm.title" type="text" placeholder="Résumez votre avis" >
               </div>
               <div class="form-group">
                 <label>Commentaire</label>
-                <textarea v-model="reviewForm.content" required placeholder="Que pensez-vous de ce produit ?"></textarea>
+                <textarea v-model="reviewForm.content" required placeholder="Que pensez-vous de ce produit ?"/>
               </div>
               <button type="submit" class="btn-primary" :disabled="isSubmitting">
                 {{ isSubmitting ? 'ENVOI...' : 'ENVOYER MON AVIS' }}
@@ -544,13 +578,13 @@ async function handleReviewSubmit() {
 
         <div class="newsletter-block">
           <div class="nl-image">
-            <img src="/images/bathrom.jpeg" alt="Inspiration" />
+            <img src="/images/bathrom.jpeg" alt="Inspiration" >
           </div>
           <div class="nl-content">
             <h2>Restez inspiré</h2>
             <p>Inscrivez-vous à notre newsletter et découvrez nos nouveautés, inspirations et offres exclusives.</p>
             <form class="nl-form" @submit.prevent>
-              <input type="email" placeholder="Votre adresse e-mail" required />
+              <input type="email" placeholder="Votre adresse e-mail" required >
               <button type="submit">M'INSCRIRE</button>
             </form>
           </div>
@@ -684,28 +718,98 @@ async function handleReviewSubmit() {
   flex-direction: column;
 }
 
-.product-category {
-  font-family: var(--font-body);
-  font-size: 0.625rem;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--dp-gold);
-  margin-bottom: 0.5rem;
+/* Custom Header */
+.product-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
 }
-
 .product-title {
   font-family: var(--font-heading);
-  font-size: 3rem;
+  font-size: 2.5rem;
   color: var(--dp-charcoal);
-  font-weight: 400;
+  font-weight: 600;
   line-height: 1.1;
-  margin: 0 0 1rem 0;
+  margin: 0;
+}
+.product-brand-box {
+  border: 1px solid var(--dp-sand);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.brand-name {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--dp-charcoal);
+}
+
+.product-sku-rating {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.sku-text {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--dp-ash);
+}
+.sku-text strong {
+  font-weight: 700;
+  color: var(--dp-charcoal);
+}
+.rating-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.reviews-count {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--dp-ash);
+}
+
+.product-promo-box {
+  background-color: #F8F8F8;
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+.promo-icon {
+  color: #F09B59;
+}
+.promo-title {
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--dp-charcoal);
+  margin: 0 0 0.5rem 0;
+}
+.promo-text {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--dp-ash);
+  margin: 0;
+}
+.promo-text a {
+  color: var(--dp-charcoal);
+  text-decoration: underline;
+  font-weight: 600;
 }
 
 .product-price {
   font-family: var(--font-heading);
-  font-size: 1.75rem;
-  color: var(--dp-gold);
+  font-size: 2rem;
+  font-weight: 700;
+  color: #F09B59;
   margin: 0 0 2rem 0;
 }
 
@@ -714,7 +818,7 @@ async function handleReviewSubmit() {
   font-size: 0.875rem;
   color: var(--dp-ash);
   line-height: 1.6;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
   max-width: 90%;
 }
 
@@ -792,15 +896,37 @@ async function handleReviewSubmit() {
   color: var(--dp-white);
 }
 
-.quantity-selector {
+.product-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: nowrap;
+}
+@media (min-width: 640px) {
+  .product-actions-row {
+    gap: 1rem;
+  }
+}
+
+.quantity-selector-box {
   display: inline-flex;
   align-items: center;
   border: 1px solid var(--dp-sand);
-  width: fit-content;
+  border-radius: 30px;
+  background: var(--dp-white);
+  height: 2.75rem;
+  padding: 0;
+  flex-shrink: 0;
+}
+.qty-divider {
+  width: 1px;
+  height: 1.25rem;
+  background-color: var(--dp-sand);
 }
 .qty-btn {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2rem;
+  height: 2.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -811,16 +937,16 @@ async function handleReviewSubmit() {
   cursor: pointer;
   transition: all 0.2s ease;
   outline: none;
+  padding: 0;
 }
 .qty-btn:hover {
   color: var(--dp-charcoal);
-  background: var(--dp-bg-alt);
 }
 .qty-btn:active {
-  background: var(--dp-sand);
+  color: var(--dp-charcoal);
 }
 .qty-val {
-  width: 2.5rem;
+  width: 1.5rem;
   text-align: center;
   font-family: var(--font-body);
   font-size: 0.875rem;
@@ -828,61 +954,84 @@ async function handleReviewSubmit() {
   font-weight: 600;
 }
 
-/* Actions */
-.product-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 3rem;
-}
-@media (min-width: 640px) {
-  .product-actions {
-    flex-direction: row;
-  }
-}
-.btn-primary {
+.btn-add-cart {
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  background: var(--dp-gold);
+  min-width: 0;
+  height: 2.75rem;
+  border-radius: 30px;
+  background-color: #F09B59;
   color: var(--dp-white);
   border: none;
-  padding: 1.25rem;
   font-family: var(--font-body);
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   cursor: pointer;
   transition: opacity 0.2s;
+  padding: 0 0.5rem;
+  white-space: nowrap;
 }
-.btn-primary:hover {
+.btn-add-cart:hover {
   opacity: 0.9;
 }
+.btn-add-cart:disabled {
+  background-color: var(--dp-sand);
+  cursor: not-allowed;
+}
 
-.btn-secondary {
+.btn-buy-now {
   flex: 1;
+  min-width: 0;
+  height: 2.75rem;
+  border-radius: 30px;
+  background-color: var(--dp-charcoal);
+  color: var(--dp-white);
+  border: none;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  padding: 0 0.5rem;
+  white-space: nowrap;
+}
+.btn-buy-now:hover {
+  opacity: 0.9;
+}
+.btn-buy-now:disabled {
+  background-color: var(--dp-ash);
+  cursor: not-allowed;
+}
+
+@media (min-width: 640px) {
+  .btn-add-cart, .btn-buy-now {
+    font-size: 0.875rem;
+    padding: 0 1rem;
+  }
+}
+
+.secondary-actions-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  background: transparent;
-  color: var(--dp-gold);
-  border: 1px solid var(--dp-gold);
-  padding: 1.25rem;
-  font-family: var(--font-body);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.2s;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 2.5rem;
 }
-.btn-secondary:hover {
-  background: var(--dp-gold);
-  color: var(--dp-white);
+
+.btn-outline-text {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--dp-charcoal);
+  cursor: pointer;
+  padding: 0;
+  gap: 0.5rem;
+}
+.btn-outline-text:hover {
+  opacity: 0.7;
 }
 
 /* Badges */
@@ -1351,41 +1500,55 @@ async function handleReviewSubmit() {
 }
 
 .review-form {
-  max-width: 600px;
+  max-width: 650px;
   margin: 0 auto 4rem;
-  background: var(--dp-bg-alt);
-  padding: 2rem;
-  border-radius: 4px;
+  background: var(--dp-white);
+  padding: 3rem 2.5rem;
+  border: 1px solid var(--dp-sand);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
 }
 .form-title {
   margin-top: 0;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   font-family: var(--font-heading);
   color: var(--dp-charcoal);
-  font-size: 1.5rem;
+  font-size: 1.75rem;
+  text-align: center;
+  font-weight: 500;
 }
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 .form-group label {
   font-family: var(--font-body);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: var(--dp-charcoal);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 .form-group input, .form-group textarea {
-  padding: 0.75rem;
-  border: 1px solid var(--dp-sand);
+  padding: 0.875rem 1rem;
+  border: 1px solid #E5E5E5;
+  border-radius: 6px;
   background: var(--dp-white);
   font-family: var(--font-body);
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
+  color: var(--dp-charcoal);
   outline: none;
+  transition: all 0.2s ease;
+}
+.form-group input::placeholder, .form-group textarea::placeholder {
+  color: #A3A3A3;
+  font-weight: 300;
 }
 .form-group input:focus, .form-group textarea:focus {
-  border-color: var(--dp-gold);
+  border-color: var(--dp-charcoal);
+  box-shadow: 0 0 0 3px rgba(34, 34, 34, 0.05);
 }
 .form-group textarea {
   min-height: 120px;
@@ -1394,19 +1557,27 @@ async function handleReviewSubmit() {
 
 .rating-input {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.5rem;
 }
 .star-btn {
   background: none;
   border: none;
-  font-size: 1.5rem;
-  color: var(--dp-sand);
+  font-size: 1.75rem;
+  color: #E5E5E5;
   cursor: pointer;
   padding: 0;
   line-height: 1;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+.star-btn:hover {
+  transform: scale(1.1);
 }
 .star-btn.active, .star-btn:hover {
   color: var(--dp-gold);
+}
+.review-form .btn-primary {
+  width: 100%;
+  margin-top: 1rem;
 }
 
 .reviews-list {
@@ -1486,5 +1657,31 @@ async function handleReviewSubmit() {
   text-align: center;
   font-family: var(--font-body);
   color: var(--color-error);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--dp-charcoal);
+  color: var(--dp-white);
+  border: 1px solid var(--dp-charcoal);
+  border-radius: 30px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.btn-primary:hover {
+  background-color: transparent;
+  color: var(--dp-charcoal);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

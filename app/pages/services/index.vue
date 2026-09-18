@@ -46,7 +46,7 @@ const icons: Record<string, any> = { Palette, Ruler, Lightbulb }
           <p class="service-desc">{{ service.description }}</p>
           <ul class="service-features">
             <li v-for="feature in service.features" :key="feature" class="service-feature">
-              <span class="feature-dot"></span>
+              <span class="feature-dot"/>
               {{ feature }}
             </li>
           </ul>

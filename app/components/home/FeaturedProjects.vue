@@ -19,6 +19,48 @@ const scrollRight = () => {
     scrollContainer.value.scrollBy({ left: 400, behavior: 'smooth' })
   }
 }
+
+// Drag to scroll logic (Mouse only)
+const isDragging = ref(false)
+let startX = 0
+let scrollLeftPos = 0
+let hasDragged = false
+
+const onDragStart = (e: MouseEvent) => {
+  isDragging.value = true
+  hasDragged = false
+  startX = e.pageX
+  if (scrollContainer.value) {
+    scrollLeftPos = scrollContainer.value.scrollLeft
+  }
+}
+
+const onDragEnd = () => {
+  isDragging.value = false
+  setTimeout(() => {
+    hasDragged = false
+  }, 50)
+}
+
+const onDragMove = (e: MouseEvent) => {
+  if (!isDragging.value || !scrollContainer.value) return
+  
+  const distance = (e.pageX - startX) * 1.5
+  
+  if (Math.abs(e.pageX - startX) > 5) {
+    hasDragged = true
+    e.preventDefault()
+  }
+  
+  scrollContainer.value.scrollLeft = scrollLeftPos - distance
+}
+
+const handleClick = (e: Event) => {
+  if (hasDragged) {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+}
 </script>
 
 <template>
@@ -30,7 +72,7 @@ const scrollRight = () => {
         <div class="fp-text-column">
           <span class="fp-subtitle">PROJETS D'EXCEPTION</span>
           <h2 class="fp-title">
-            Des réalisations<br/>uniques.
+            Des réalisations<br>uniques.
           </h2>
           <NuxtLink to="/projects" class="fp-link">
             Voir tous les projets
@@ -43,12 +85,18 @@ const scrollRight = () => {
           <div 
             ref="scrollContainer" 
             class="fp-scroll-area hide-scrollbar"
+            :class="{ 'is-dragging': isDragging }"
+            @mousedown="onDragStart"
+            @mouseleave="onDragEnd"
+            @mouseup="onDragEnd"
+            @mousemove="onDragMove"
           >
             <NuxtLink
               v-for="project in featured"
               :key="project.id"
               :to="`/projects/${project.slug}`"
               class="fp-card"
+              @click="handleClick"
             >
               <div class="fp-image-wrapper">
                 <BaseImage
@@ -70,10 +118,10 @@ const scrollRight = () => {
           
           <!-- Navigation Arrows -->
           <div class="fp-nav">
-            <button @click="scrollLeft" class="fp-nav-btn">
+            <button class="fp-nav-btn" @click="scrollLeft">
               <ArrowLeft class="fp-nav-icon" />
             </button>
-            <button @click="scrollRight" class="fp-nav-btn">
+            <button class="fp-nav-btn" @click="scrollRight">
               <ArrowRight class="fp-nav-icon" />
             </button>
           </div>
@@ -187,6 +235,13 @@ const scrollRight = () => {
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   padding-bottom: var(--space-6);
+  -webkit-overflow-scrolling: touch;
+  user-select: none;
+}
+
+.fp-scroll-area.is-dragging {
+  scroll-snap-type: none;
+  cursor: grabbing;
 }
 
 .hide-scrollbar::-webkit-scrollbar {
@@ -229,6 +284,7 @@ const scrollRight = () => {
   height: 100%;
   object-fit: cover;
   transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none; /* Prevents image dragging ghost */
 }
 
 .fp-card:hover .fp-card-image {

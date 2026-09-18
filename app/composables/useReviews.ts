@@ -12,8 +12,8 @@ export function useReviews() {
   // Use a map to track fetched product IDs to avoid redundant calls if needed
   // Or just rely on component lifecycle
 
-  async function fetchReviews(productId: string) {
-    if (!productId) return
+  async function fetchReviews(handle: string) {
+    if (!handle) return
 
     isLoading.value = true
     error.value = null
@@ -21,8 +21,8 @@ export function useReviews() {
     try {
       // Run both queries in parallel
       const [fetchedReviews, fetchedSummary] = await Promise.all([
-        reviewRepository.getReviewsByProduct(productId),
-        reviewRepository.getReviewSummary(productId)
+        reviewRepository.getReviewsByProduct(handle),
+        reviewRepository.getReviewSummary(handle)
       ])
 
       reviews.value = fetchedReviews
@@ -35,17 +35,14 @@ export function useReviews() {
     }
   }
 
-  async function submitReview(productId: string, payload: Omit<ReviewSubmitPayload, 'productId'>) {
-    if (!productId) return
+  async function submitReview(handle: string, payload: Omit<ReviewSubmitPayload, 'productId'>) {
+    if (!handle) return
 
     isSubmitting.value = true
     error.value = null
 
     try {
-      const newReview = await reviewRepository.submitReview({
-        ...payload,
-        productId
-      })
+      const newReview = await reviewRepository.submitReview(handle, payload)
 
       // Update local state instead of refetching to save a request
       reviews.value.unshift(newReview)
@@ -61,7 +58,7 @@ export function useReviews() {
       return true
     } catch (err) {
       console.error('Failed to submit review', err)
-      // error.value = 'Une erreur est survenue lors de l\\'envoi de votre avis.'
+      error.value = 'Une erreur est survenue lors de l\'envoi de votre avis.'
       return false
     } finally {
       isSubmitting.value = false

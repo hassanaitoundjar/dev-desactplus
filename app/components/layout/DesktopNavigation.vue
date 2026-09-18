@@ -41,7 +41,7 @@ const { navLinks, isActive } = useNavigation()
           
           <!-- Featured Image slot inside Mega Menu -->
           <div class="mega-menu-featured group-featured">
-            <img src="/images/collection-salon.png" class="featured-img" />
+            <img src="/images/collection-salon.png" class="featured-img" >
             <div class="featured-content">
               <span class="featured-tag">Nouvelle Collection</span>
               <NuxtLink to="/collections/salon" class="featured-link">

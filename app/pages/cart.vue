@@ -96,7 +96,7 @@ const handleRemoveCoupon = async () => {
             <span class="th-price">Prix</span>
             <span class="th-qty">Quantité</span>
             <span class="th-total">Total</span>
-            <span class="th-action"></span>
+            <span class="th-action"/>
           </div>
 
           <!-- Items -->
@@ -106,7 +106,7 @@ const handleRemoveCoupon = async () => {
               <div class="item-main">
                 <!-- Image -->
                 <NuxtLink :to="`/products/${product!.slug}`" class="item-img-link">
-                  <img :src="product!.images[0]?.src || '/images/collection-lighting.png'" :alt="product!.name" class="item-img" />
+                  <img :src="product!.images[0]?.src || '/images/collection-lighting.png'" :alt="product!.name" class="item-img" >
                 </NuxtLink>
   
                 <!-- Info -->
@@ -135,7 +135,7 @@ const handleRemoveCoupon = async () => {
               <span class="item-total">{{ itemLineTotal(cartItem.price, cartItem.quantity) }}</span>
 
               <!-- Remove -->
-              <button class="item-remove" @click="remove(cartItem.id)" aria-label="Supprimer">
+              <button class="item-remove" aria-label="Supprimer" @click="remove(cartItem.id)">
                 <Trash2 :size="16" />
               </button>
             </div>
@@ -162,7 +162,7 @@ const handleRemoveCoupon = async () => {
                 <span>Sous-total</span>
                 <span class="summary-val">{{ formatPrice(subtotal) }}</span>
               </div>
-              <div class="summary-line summary-line--discount" v-if="discountTotal > 0">
+              <div v-if="discountTotal > 0" class="summary-line summary-line--discount">
                 <span>Remise {{ couponCode ? `(${couponCode})` : '' }}</span>
                 <span class="summary-val discount-val">-{{ formatPrice(discountTotal) }}</span>
               </div>
@@ -175,7 +175,7 @@ const handleRemoveCoupon = async () => {
             <div class="coupon-section">
               <div v-if="couponCode && discountTotal > 0" class="coupon-applied">
                 <span class="coupon-applied-text">✓ Code promo : <strong>{{ couponCode }}</strong></span>
-                <button @click="handleRemoveCoupon" :disabled="isApplyingCoupon" class="coupon-remove-btn" aria-label="Supprimer le code promo">
+                <button :disabled="isApplyingCoupon" class="coupon-remove-btn" aria-label="Supprimer le code promo" @click="handleRemoveCoupon">
                   <X :size="14" />
                 </button>
               </div>
@@ -187,11 +187,11 @@ const handleRemoveCoupon = async () => {
                     placeholder="Code promo" 
                     class="coupon-input"
                     @keyup.enter="handleApplyCoupon"
-                  />
+                  >
                   <button 
-                    @click="handleApplyCoupon" 
-                    :disabled="!couponInput || isApplyingCoupon"
+                    :disabled="!couponInput || isApplyingCoupon" 
                     class="coupon-apply-btn"
+                    @click="handleApplyCoupon"
                   >
                     {{ isApplyingCoupon ? '...' : 'Appliquer' }}
                   </button>

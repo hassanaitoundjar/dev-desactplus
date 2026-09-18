@@ -22,5 +22,5 @@ withDefaults(defineProps<Props>(), {
     :height="height"
     :loading="loading"
     :class="$props.class"
-  />
+  >
 </template>

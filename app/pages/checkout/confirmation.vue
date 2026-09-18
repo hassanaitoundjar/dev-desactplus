@@ -44,7 +44,7 @@ onMounted(() => {
         <p class="confirm-sub">
           Votre commande <strong>{{ orderId }}</strong> a bien été enregistrée.
           <template v-if="orderInfo?.email">
-            <br />Un e-mail de confirmation a été envoyé à <strong>{{ orderInfo.email }}</strong>.
+            <br >Un e-mail de confirmation a été envoyé à <strong>{{ orderInfo.email }}</strong>.
           </template>
         </p>
 

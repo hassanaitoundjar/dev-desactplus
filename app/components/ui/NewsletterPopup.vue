@@ -42,7 +42,7 @@ const submitNewsletter = () => {
         <div class="nl-modal" role="dialog" aria-modal="true">
           
           <!-- Close Button -->
-          <button @click="closePopup" class="nl-btn-close-modal" aria-label="Fermer">
+          <button class="nl-btn-close-modal" aria-label="Fermer" @click="closePopup">
             <X :size="20" stroke-width="1.5" />
           </button>
 
@@ -52,8 +52,8 @@ const submitNewsletter = () => {
             <!-- Left: Text & Form -->
             <div class="nl-content">
               <span class="nl-subtitle">BIENVENUE CHEZ ATELIER MAISON</span>
-              <h2 class="nl-title">L'élégance<br/>commence ici.</h2>
-              <div class="nl-divider"></div>
+              <h2 class="nl-title">L'élégance<br>commence ici.</h2>
+              <div class="nl-divider"/>
               
               <p class="nl-desc">
                 Inscrivez-vous et recevez 10 % de réduction sur votre première commande, ainsi que nos inspirations et nouveautés exclusives.
@@ -66,13 +66,13 @@ const submitNewsletter = () => {
                   placeholder="Votre adresse e-mail" 
                   class="nl-input"
                   required
-                />
+                >
                 <button type="submit" class="nl-btn-submit">
                   RECEVOIR 10 % DE RÉDUCTION
                 </button>
               </form>
               
-              <button @click="closePopup" class="nl-btn-close-text">
+              <button class="nl-btn-close-text" @click="closePopup">
                 Non merci, je préfère découvrir le site
               </button>
             </div>

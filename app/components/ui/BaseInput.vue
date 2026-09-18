@@ -31,7 +31,7 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
       :required="required"
       class="base-input-field"
       @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
-    />
+    >
     <p v-if="error" class="base-input-error">{{ error }}</p>
   </div>
 </template>

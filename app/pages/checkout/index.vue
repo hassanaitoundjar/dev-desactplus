@@ -138,12 +138,12 @@ async function placeOrder() {
           <span class="progress-num"><Check v-if="step > 1" :size="12" /><span v-else>1</span></span>
           <span class="progress-label">Livraison</span>
         </div>
-        <div class="progress-line" :class="{ filled: step >= 2 }"></div>
+        <div class="progress-line" :class="{ filled: step >= 2 }"/>
         <div class="progress-step" :class="{ active: step >= 2 }">
           <span class="progress-num">2</span>
           <span class="progress-label">Paiement</span>
         </div>
-        <div class="progress-line" :class="{ filled: step >= 3 }"></div>
+        <div class="progress-line" :class="{ filled: step >= 3 }"/>
         <div class="progress-step" :class="{ active: step >= 3 }">
           <span class="progress-num">3</span>
           <span class="progress-label">Confirmation</span>
@@ -161,12 +161,12 @@ async function placeOrder() {
             <div class="field-row">
               <div class="field" :class="{ error: formErrors.firstName }">
                 <label for="fn">Prénom *</label>
-                <input id="fn" v-model="form.firstName" type="text" placeholder="Votre prénom" />
+                <input id="fn" v-model="form.firstName" type="text" placeholder="Votre prénom" >
                 <span v-if="formErrors.firstName" class="field-error">{{ formErrors.firstName }}</span>
               </div>
               <div class="field" :class="{ error: formErrors.lastName }">
                 <label for="ln">Nom *</label>
-                <input id="ln" v-model="form.lastName" type="text" placeholder="Votre nom" />
+                <input id="ln" v-model="form.lastName" type="text" placeholder="Votre nom" >
                 <span v-if="formErrors.lastName" class="field-error">{{ formErrors.lastName }}</span>
               </div>
             </div>
@@ -174,19 +174,19 @@ async function placeOrder() {
             <div class="field-row">
               <div class="field" :class="{ error: formErrors.email }">
                 <label for="em">E-mail *</label>
-                <input id="em" v-model="form.email" type="email" placeholder="votre@email.com" />
+                <input id="em" v-model="form.email" type="email" placeholder="votre@email.com" >
                 <span v-if="formErrors.email" class="field-error">{{ formErrors.email }}</span>
               </div>
               <div class="field" :class="{ error: formErrors.phone }">
                 <label for="ph">Téléphone *</label>
-                <input id="ph" v-model="form.phone" type="tel" placeholder="+212 6XX XXX XXX" />
+                <input id="ph" v-model="form.phone" type="tel" placeholder="+212 6XX XXX XXX" >
                 <span v-if="formErrors.phone" class="field-error">{{ formErrors.phone }}</span>
               </div>
             </div>
 
             <div class="field" :class="{ error: formErrors.address }">
               <label for="addr">Adresse complète *</label>
-              <input id="addr" v-model="form.address" type="text" placeholder="Numéro, rue, quartier" />
+              <input id="addr" v-model="form.address" type="text" placeholder="Numéro, rue, quartier" >
               <span v-if="formErrors.address" class="field-error">{{ formErrors.address }}</span>
             </div>
 
@@ -204,13 +204,13 @@ async function placeOrder() {
               </div>
               <div class="field">
                 <label for="zip">Code postal</label>
-                <input id="zip" v-model="form.postalCode" type="text" placeholder="20000" />
+                <input id="zip" v-model="form.postalCode" type="text" placeholder="20000" >
               </div>
             </div>
 
             <div class="field">
               <label for="notes">Notes de livraison <span class="optional">(optionnel)</span></label>
-              <textarea id="notes" v-model="form.notes" rows="3" placeholder="Instructions spéciales..."></textarea>
+              <textarea id="notes" v-model="form.notes" rows="3" placeholder="Instructions spéciales..."/>
             </div>
 
             <button class="btn-next" @click="goToPayment">
@@ -230,8 +230,8 @@ async function placeOrder() {
 
             <div class="pay-options">
               <label class="pay-option" :class="{ selected: form.paymentMethod === 'cod' }">
-                <input type="radio" v-model="form.paymentMethod" value="cod" />
-                <span class="radio-dot"></span>
+                <input v-model="form.paymentMethod" type="radio" value="cod" >
+                <span class="radio-dot"/>
                 <div class="pay-text">
                   <strong>Paiement à la livraison</strong>
                   <span>Payez en espèces lors de la réception.</span>
@@ -239,8 +239,8 @@ async function placeOrder() {
               </label>
 
               <label class="pay-option" :class="{ selected: form.paymentMethod === 'transfer' }">
-                <input type="radio" v-model="form.paymentMethod" value="transfer" />
-                <span class="radio-dot"></span>
+                <input v-model="form.paymentMethod" type="radio" value="transfer" >
+                <span class="radio-dot"/>
                 <div class="pay-text">
                   <strong>Virement bancaire</strong>
                   <span>Expédition après réception du virement.</span>
@@ -248,8 +248,8 @@ async function placeOrder() {
               </label>
 
               <label class="pay-option" :class="{ selected: form.paymentMethod === 'card' }">
-                <input type="radio" v-model="form.paymentMethod" value="card" />
-                <span class="radio-dot"></span>
+                <input v-model="form.paymentMethod" type="radio" value="card" >
+                <span class="radio-dot"/>
                 <div class="pay-text">
                   <div class="pay-title-row">
                     <CreditCard :size="14" class="card-icon" />
@@ -277,7 +277,7 @@ async function placeOrder() {
             </div>
 
             <button class="btn-next btn-place" :disabled="isSubmitting" @click="placeOrder">
-              <span v-if="isSubmitting" class="spinner"></span>
+              <span v-if="isSubmitting" class="spinner"/>
               {{ isSubmitting ? 'Traitement...' : 'Confirmer la commande' }}
             </button>
           </div>
@@ -291,7 +291,7 @@ async function placeOrder() {
             <div class="sum-items">
               <div v-for="{ cartItem, product } in cartProducts" :key="cartItem.productId" class="sum-item">
                 <div class="sum-img-wrap">
-                  <img :src="product?.images?.[0]?.src || '/images/collection-lighting.png'" :alt="product?.name" class="sum-img" />
+                  <img :src="product?.images?.[0]?.src || '/images/collection-lighting.png'" :alt="product?.name" class="sum-img" >
                   <span class="sum-qty-badge">{{ cartItem.quantity }}</span>
                 </div>
                 <div class="sum-item-info">

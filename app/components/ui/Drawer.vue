@@ -24,17 +24,22 @@ defineEmits<{ close: [] }>()
         :class="side === 'right' ? 'drawer-side-right' : 'drawer-side-left'"
       >
         <div class="drawer-header">
-          <h3 v-if="title" class="drawer-title">{{ title }}</h3>
-          <button
-            class="drawer-close-btn"
-            aria-label="Fermer"
-            @click="$emit('close')"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
-          </button>
+          <slot name="header">
+            <h3 v-if="title" class="drawer-title">{{ title }}</h3>
+            <button
+              class="drawer-close-btn"
+              aria-label="Fermer"
+              @click="$emit('close')"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+            </button>
+          </slot>
         </div>
         <div class="drawer-content">
           <slot />
+        </div>
+        <div v-if="$slots.footer" class="drawer-footer">
+          <slot name="footer" />
         </div>
       </div>
     </Transition>
@@ -107,6 +112,12 @@ defineEmits<{ close: [] }>()
   flex: 1 1 0%;
   overflow-y: auto;
   padding: 1.5rem;
+}
+
+.drawer-footer {
+  padding: 1.5rem;
+  border-top: 1px solid var(--dp-sand);
+  background-color: var(--dp-white);
 }
 
 .drawer-backdrop-enter-active,

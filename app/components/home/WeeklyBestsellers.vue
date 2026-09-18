@@ -66,8 +66,8 @@ function setCategory(id: string) {
 <style scoped>
 .weekly-bestsellers {
   padding: var(--space-20) 0;
-  background-color:  #F9F8F6;
-;
+  background-color: #F9F8F6;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
 }
 
 .header-row {
@@ -93,29 +93,46 @@ function setCategory(id: string) {
   margin: 0;
 }
 
-@media (min-width: 768px) {
-  .title {
-    font-size: 2.5rem;
-  }
+@media (max-width: 768.98px) {
+    .title {
+        font-size: 22px;
+    }
 }
 
 .filters {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: var(--space-4);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  padding-bottom: 4px; /* Space for focus rings */
+  width: 100%;
+}
+.filters::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+@media (min-width: 768px) {
+  .filters {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    width: auto;
+  }
 }
 
 .filter-btn {
   background: transparent;
   border: none;
-  font-size: 0.875rem;
-  color: #6b7280;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #888;
   cursor: pointer;
-  padding: 0.25rem 0;
+  padding: 0.25rem 0.5rem;
   border-bottom: 2px solid transparent;
   transition: all 0.3s ease;
-  font-weight: 500;
+  white-space: nowrap;
 }
 
 .filter-btn:hover {
@@ -124,19 +141,20 @@ function setCategory(id: string) {
 
 .filter-btn.active {
   color: var(--dp-charcoal);
-  border-bottom-color: var(--dp-charcoal);
+  font-weight: 600;
+  border-bottom: 2px solid #f38d53;
 }
 
-/* 5 Column Grid */
+/* Product Grid */
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: var(--space-6);
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem; /* Explicitly 1.5rem in case variable is failing */
 }
 
 @media (min-width: 480px) {
   .products-grid {
-    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
   }
 }
 

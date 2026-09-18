@@ -37,6 +37,7 @@ export function useCart() {
   const cart = useState<APICart | null>('cart', () => null)
   const items = useState<CartItem[]>('cart-items', () => [])
   const isSyncing = useState<boolean>('cart-syncing', () => false)
+  const isOpen = useState<boolean>('cart-open', () => false)
 
   const client = useApiClient()
 
@@ -222,6 +223,7 @@ export function useCart() {
     clear,
     isInCart,
     applyCoupon,
-    removeCoupon
+    removeCoupon,
+    isOpen
   }
 }

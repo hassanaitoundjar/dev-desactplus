@@ -20,7 +20,7 @@ import { ArrowRight, ArrowLeft } from 'lucide-vue-next'
           </div>
           <div class="tst-image-caption">
             <span>Projet Résidentiel</span>
-            <span class="tst-divider"></span>
+            <span class="tst-divider"/>
             <span>Casablanca, 2023</span>
           </div>
         </div>

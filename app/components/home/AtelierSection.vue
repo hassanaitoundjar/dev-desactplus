@@ -22,7 +22,7 @@ import { ArrowRight } from 'lucide-vue-next'
           <span class="as-subtitle">L'ATELIER</span>
           
           <h2 class="as-title">
-            Un savoir-faire<br/>
+            Un savoir-faire<br>
             au service de <span class="as-title-highlight">l'exception.</span>
           </h2>
           
