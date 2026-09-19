@@ -132,10 +132,10 @@ function handleAddToCart() {
   }
 }
 
-function handleBuyNow() {
+async function handleBuyNow() {
   if (product.value && selectedVariant.value) {
-    addToCart(selectedVariant.value.id, quantity.value)
-    useRouter().push('/checkout')
+    await addToCart(selectedVariant.value.id, quantity.value)
+    navigateTo('/checkout')
   }
 }
 

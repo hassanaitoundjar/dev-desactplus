@@ -5,6 +5,7 @@ import {
 } from 'lucide-vue-next'
 import MobileNavigation from './MobileNavigation.vue'
 import Topbar from './Topbar.vue'
+import CategoryIcon from '~/components/ui/CategoryIcon.vue'
 import { useNavigation } from '~/composables/useNavigation'
 import { useCart } from '~/composables/useCart'
 import { useWishlist } from '~/composables/useWishlist'
@@ -37,11 +38,11 @@ function handleSearch() {
 
 // Bottom bar categories from API API
 const dynamicCategories = computed(() => {
-  const cats = [{ name: 'Tous les produits', icon: LayoutGrid, link: '/products' }]
+  const cats = [{ name: 'Tous les produits', slug: 'all', link: '/products' }]
   if (apiCategories.value) {
     cats.push(...apiCategories.value.map(cat => ({
       name: cat.name,
-      icon: LayoutGrid,
+      slug: cat.slug,
       link: `/products?category=${cat.id}`
     })))
   }
@@ -109,7 +110,7 @@ const dynamicCategories = computed(() => {
     <div class="header-bottom container-site">
       <div class="categories-list">
         <NuxtLink v-for="cat in dynamicCategories" :key="cat.name" :to="cat.link" class="category-link">
-          <component :is="cat.icon" :size="16" :stroke-width="1.5" class="category-icon" />
+          <CategoryIcon :slug="cat.slug" :name="cat.name" :size="16" :stroke-width="1.5" class="category-icon" />
           <span>{{ cat.name }}</span>
         </NuxtLink>
       </div>

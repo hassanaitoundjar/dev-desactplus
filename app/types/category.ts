@@ -4,6 +4,7 @@ export interface Category {
   name: string
   description: string
   image: string
+  icon: string
   productCount: number
   featured: boolean
   order: number

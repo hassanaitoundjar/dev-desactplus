@@ -136,7 +136,7 @@ const handleClick = (e: Event) => {
 .fp-section {
   padding-top: var(--space-24);
   padding-bottom: var(--space-24);
-  background-color: var(--dp-bg-alt);
+  /* background-color: var(--dp-bg-alt); */
 }
 
 .fp-layout {

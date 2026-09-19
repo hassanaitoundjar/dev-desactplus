@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import Container from '../ui/Container.vue'
-import BaseButton from '../ui/BaseButton.vue'
 import { useCategories } from '~/composables/useCategories'
 import { ref } from 'vue'
 
@@ -41,7 +40,7 @@ const showAll = ref(false)
 .category-list-section {
   padding-top: 5rem;
   padding-bottom: 5rem;
-  background-color: var(--dp-white);
+  /* background-color: var(--dp-ivory); */
 }
 
 .category-list-header {
@@ -145,6 +144,7 @@ const showAll = ref(false)
 
 .cl-card:hover .cl-image {
   transform: scale(1.05);
+  filter: brightness(0.8);
 }
 
 .cl-pill {

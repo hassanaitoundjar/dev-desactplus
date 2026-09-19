@@ -45,7 +45,7 @@ import Container from '../ui/Container.vue'
 
 <style scoped>
 .trust-bar {
-  background-color: #F9F8F6;
+  /* background-color: #F9F8F6; */
   padding: 3rem 0;
   width: 100%;
   border-top: 1px solid rgba(0, 0, 0, 0.04);

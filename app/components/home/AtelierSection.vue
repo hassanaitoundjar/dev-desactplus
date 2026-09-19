@@ -53,7 +53,7 @@ import { ArrowRight } from 'lucide-vue-next'
 .as-section {
   padding-top: var(--space-24);
   padding-bottom: var(--space-24);
-  background-color: var(--dp-bg-alt);
+  /* background-color: var(--dp-bg-alt); */
   overflow: hidden;
 }
 

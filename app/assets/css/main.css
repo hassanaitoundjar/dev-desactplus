@@ -10,7 +10,7 @@
   --dp-gold: #C19A5B;
   --dp-gold-light: #D4B07A;
   --dp-gold-dark: #A17F45;
-  --dp-ivory: #F4F3EF;
+  --dp-ivory: #EAE8E4;
   --dp-cream: #F3EDE4;
   --dp-sand: #E8DFD3;
   --dp-taupe: #B5A898;
@@ -69,6 +69,10 @@ html {
 
 body {
   background-color: var(--dp-ivory);
+  background-image: url('/images/bg-image.jpg');
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center;
   color: var(--dp-charcoal);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;

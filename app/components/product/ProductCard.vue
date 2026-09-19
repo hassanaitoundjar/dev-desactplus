@@ -44,8 +44,12 @@ const categoryName = computed(() => {
   return props.product.categories?.[0]?.name || props.product.categoryId || 'decor'
 })
 
-const productRating = computed(() => props.product.rating || '4.5')
+const productRating = computed(() => {
+  const rating = Number(props.product.rating) || 0
+  return rating > 0 ? rating.toFixed(1) : '0.0'
+})
 
+const reviewCount = computed(() => props.product.reviewsCount || 0)
 const isDiscounted = computed(() => props.product.compareAtPrice && props.product.compareAtPrice > props.product.price)
 const discountPercent = computed(() => {
   if (!isDiscounted.value) return 0
@@ -108,8 +112,9 @@ function prevImage(e: Event) {
       <NuxtLink :to="`/products/${product.slug}`" class="pc-link">
         <div class="pc-title-row">
           <h3 class="pc-title">{{ product.name }}</h3>
-          <div class="pc-rating">
+          <div class="pc-rating" v-if="Number(productRating) > 0">
             {{ productRating }} <Star :size="12" fill="#FBBF24" color="#FBBF24" />
+            <span v-if="reviewCount > 0" class="pc-review-count">({{ reviewCount }})</span>
           </div>
         </div>
         
@@ -337,6 +342,12 @@ function prevImage(e: Event) {
   align-items: center;
   gap: 2px;
   flex-shrink: 0;
+}
+
+.pc-review-count {
+  font-size: 0.7rem;
+  color: #999;
+  margin-left: 2px;
 }
 
 .pc-category {

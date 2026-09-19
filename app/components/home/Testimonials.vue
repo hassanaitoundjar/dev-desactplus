@@ -59,7 +59,7 @@ import { ArrowRight, ArrowLeft } from 'lucide-vue-next'
 .tst-section {
   padding-top: var(--space-24);
   padding-bottom: var(--space-24);
-  background-color: var(--dp-white);
+  /* background-color: var(--dp-white); */
   overflow: hidden;
 }
 

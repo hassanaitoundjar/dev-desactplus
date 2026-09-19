@@ -74,7 +74,8 @@ If you wish to fully utilize the UI, consider enriching your Medusa Products, Ca
 ### Collections & Categories Metadata
 | Field Name | Expected Type | Required | Usage | Fallback |
 | :--- | :--- | :--- | :--- | :--- |
-| `metadata.image` | string (URL/Path) | Optional | Banner/Cover image in lists | `'/images/collection-salon.png'` |
+| `metadata.image` | string (URL/Path) | Optional | Banner/Cover image in lists | Auto-resolved from category handle |
+| `metadata.icon` | string (URL/Path) | Optional | SVG icon for category | Auto-resolved from category handle |
 | `metadata.description` | string | Optional | Subtitle text in UI | `"Collection [Title]"` |
 | `metadata.productCount` | number | Optional | Display item count in UI | `0` |
 | `metadata.featured` | boolean | Optional | Highlights category in grid | `true` for first 4 items |
