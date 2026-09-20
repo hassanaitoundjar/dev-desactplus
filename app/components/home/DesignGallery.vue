@@ -2,32 +2,14 @@
 import Container from '../ui/Container.vue'
 import { ref, computed } from 'vue'
 import { useCart } from '~/composables/useCart'
+import { useGallery } from '~/composables/useGallery'
+import type { GalleryItem, Hotspot } from '~/repositories/gallery.repository'
 
-// Product hotspot on a gallery image
-interface Hotspot {
-  x: number // percentage from left
-  y: number // percentage from top
-  title: string
-  price: string
-  description: string
-  image: string
-  link: string
-  variantId?: string
-}
+// Fetch gallery items & dynamic categories from backend API
+const { items: apiItems, categories: apiCategories } = useGallery()
 
-// Gallery item type
-interface GalleryItem {
-  id: string
-  src: string
-  alt: string
-  category: string
-  aspect: 'tall' | 'wide' | 'square'
-  link: string
-  hotspots?: Hotspot[]
-}
-
-// Filter categories
-const filterCategories = [
+// Fallback filter categories
+const staticFilterCategories = [
   'All',
   'Salon',
   'Chambre',
@@ -39,8 +21,8 @@ const filterCategories = [
   'Décoration',
 ]
 
-// Gallery items with product hotspots
-const galleryItems: GalleryItem[] = [
+// Fallback gallery items with product hotspots
+const staticGalleryItems: GalleryItem[] = [
   {
     id: '1',
     src: '/images/collection-salon.png',
@@ -475,13 +457,26 @@ const galleryItems: GalleryItem[] = [
   },
 ]
 
+// Dynamic or static categories
+const filterCategories = computed(() => {
+  if (apiCategories.value && apiCategories.value.length > 0) {
+    return ['All', ...apiCategories.value]
+  }
+  return staticFilterCategories
+})
+
+// Dynamic or static gallery items
+const allItems = computed<GalleryItem[]>(() => {
+  return apiItems.value && apiItems.value.length > 0 ? apiItems.value : staticGalleryItems
+})
+
 const activeFilter = ref('All')
 const itemsPerPage = 9
 const visibleCount = ref(itemsPerPage)
 
 const filteredItems = computed(() => {
-  if (activeFilter.value === 'All') return galleryItems
-  return galleryItems.filter(item => item.category === activeFilter.value)
+  if (activeFilter.value === 'All') return allItems.value
+  return allItems.value.filter(item => item.category === activeFilter.value)
 })
 
 const visibleItems = computed(() => {
@@ -542,9 +537,10 @@ async function onAddToCart(spot: Hotspot, key: string, e: Event) {
   e.preventDefault()
   e.stopPropagation()
 
-  if (spot.variantId) {
+  const variantId = spot.variantId || spot.variant_id
+  if (variantId) {
     try {
-      await addToCart(spot.variantId, 1)
+      await addToCart(variantId, 1)
     } catch (err) {
       console.error(err)
     }
@@ -646,7 +642,7 @@ const pillsContainer = ref<HTMLElement | null>(null)
                     @click.stop
                   >
                     <!-- Product Thumbnail -->
-                    <NuxtLink :to="spot.link" class="dg-card-image-wrap">
+                    <NuxtLink v-if="spot.image" :to="spot.link" class="dg-card-image-wrap">
                       <img
                         :src="spot.image"
                         :alt="spot.title"
