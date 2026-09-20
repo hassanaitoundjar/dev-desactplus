@@ -22,13 +22,22 @@ const form = ref({
 
 const status = ref<'idle' | 'loading' | 'success'>('idle')
 
+import { useApiClient } from '~/api/apiClient'
+const api = useApiClient()
+
 async function submit() {
   status.value = 'loading'
-  // Simulate API
-  setTimeout(() => {
+  
+  try {
+    const response = await api.post('/store/contact', form.value)
+    
     status.value = 'success'
     form.value = { name: '', email: '', phone: '', subject: '', message: '' }
-  }, 1000)
+  } catch (error) {
+    console.error('Contact form submission failed:', error)
+    status.value = 'idle'
+    alert('Une erreur est survenue lors de l\'envoi du message. Veuillez réessayer.')
+  }
 }
 </script>
 

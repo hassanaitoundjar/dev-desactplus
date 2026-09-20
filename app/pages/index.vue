@@ -6,6 +6,7 @@ import AtelierSection from '~/components/home/AtelierSection.vue'
 import FeaturedProjects from '~/components/home/FeaturedProjects.vue'
 import Testimonials from '~/components/home/Testimonials.vue'
 import TrustBar from '~/components/home/TrustBar.vue'
+import DesignGallery from '~/components/home/DesignGallery.vue'
 import { useSeo } from '~/composables/useSeo'
 import LatestArticles from '~/components/home/LatestArticles.vue'
 
@@ -22,6 +23,7 @@ useSeo({
     <WeeklyBestsellers />
     <AtelierSection />
     <FeaturedProjects />
+    <DesignGallery />
     <Testimonials />
     <LatestArticles/>
     <TrustBar />
