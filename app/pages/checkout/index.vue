@@ -4,7 +4,8 @@ import { useCheckout } from '~/composables/useCheckout'
 import { useCart } from '~/composables/useCart'
 import Container from '~/components/ui/Container.vue'
 import { formatPrice } from '~/utils/formatPrice'
-import { Lock, Truck, ShieldCheck, ChevronDown, CreditCard, ArrowLeft, Check } from 'lucide-vue-next'
+import { Lock, Truck, ShieldCheck, ChevronDown, CreditCard, ArrowLeft, Check, Building2, Info, Store, Smartphone, Landmark, Copy } from 'lucide-vue-next'
+import { useApiClient } from '~/api/apiClient'
 
 definePageMeta({ layout: 'default' })
 
@@ -12,16 +13,23 @@ const router = useRouter()
 const { items, isEmpty, clear } = useCart()
 const { cartProducts, subtotal, shipping, discountTotal, couponCode, total, completeCheckout } = useCheckout()
 
-// Redirect if empty
-onMounted(() => {
-  if (isEmpty.value) router.replace('/cart')
-})
-
-// Form
 const step = ref(1)
 const isSubmitting = ref(false)
 const formErrors = ref<Record<string, string>>({})
 const checkoutError = ref('')
+const bankAccounts = ref<Array<{id: number, bank_name: string, account_name: string, rib: string}>>([])
+
+const api = useApiClient()
+
+onMounted(async () => {
+  if (isEmpty.value) router.replace('/cart')
+  try {
+    const data = await api.get<any>('/store/bank-accounts')
+    bankAccounts.value = data || []
+  } catch (e) {
+    console.error('Failed to fetch bank accounts', e)
+  }
+})
 
 const form = ref({
   firstName: '',
@@ -58,6 +66,14 @@ function goToPayment() {
 
 function goBack() {
   step.value = 1
+}
+
+function copyToClipboard(text: string) {
+  if (import.meta.client) {
+    navigator.clipboard.writeText(text)
+      .then(() => alert('Copié dans le presse-papiers !'))
+      .catch(err => console.error('Failed to copy text: ', err))
+  }
 }
 
 async function placeOrder() {
@@ -238,26 +254,54 @@ async function placeOrder() {
                 </div>
               </label>
 
+
+
               <label class="pay-option" :class="{ selected: form.paymentMethod === 'transfer' }">
                 <input v-model="form.paymentMethod" type="radio" value="transfer" >
                 <span class="radio-dot"/>
-                <div class="pay-text">
-                  <strong>Virement bancaire</strong>
-                  <span>Expédition après réception du virement.</span>
+                <div class="pay-text" style="width: 100%;">
+                  <div class="pay-title-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <div>
+                      <strong>Virement bancaire</strong>
+                      <span style="display: block; font-size: 0.8rem; color: #6b7280; margin-top: 2px;">Payez directement depuis votre compte bancaire.</span>
+                    </div>
+                    <Building2 :size="18" style="color: #4b5563;" />
+                  </div>
+                  
+                  <div v-if="form.paymentMethod === 'transfer'" class="transfer-details" style="margin-top: 16px; display: flex; flex-direction: column; gap: 12px;">
+                    <!-- Dynamic Banks -->
+                    <div v-for="bank in bankAccounts" :key="bank.id" style="background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; font-size: 0.85rem; color: #374151;">
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="font-weight: 600;">Nom de la banque:</span>
+                        <span>{{ bank.bank_name }}</span>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="font-weight: 600;">Nom du compte:</span>
+                        <span>{{ bank.account_name }}</span>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 600;">RIB:</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <span style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: monospace; letter-spacing: 0.5px; color: #4f46e5;">{{ bank.rib }}</span>
+                          <button @click.prevent="copyToClipboard(bank.rib)" style="display: flex; align-items: center; gap: 4px; color: #6b7280; font-size: 0.75rem; background: none; border: none; cursor: pointer;">
+                            <Copy :size="12" /> Copier
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style="font-size: 0.8rem; color: #4b5563; text-align: center; margin-top: 8px; line-height: 1.5;">
+                      Veuillez inclure votre numéro de commande dans la référence du virement.<br>Pour toute assistance, contactez-nous par e-mail à <strong>order@dhenbio.com</strong><br>ou via WhatsApp au <strong>+212 7 02 02 34 13</strong>.<br>Votre commande sera traitée dès confirmation du paiement.
+                    </div>
+                    
+                    <div style="background: #eff6ff; border-radius: 6px; padding: 12px; font-size: 0.8rem; color: #1e3a8a; display: flex; align-items: flex-start; gap: 8px;">
+                      <Info :size="16" style="flex-shrink: 0; margin-top: 2px;" />
+                      <span>Vous verrez ces détails bancaires à nouveau après avoir complété votre commande. Veuillez d'abord <strong>confirmer votre commande</strong>, puis effectuer le virement avec les informations fournies.</span>
+                    </div>
+                  </div>
                 </div>
               </label>
 
-              <label class="pay-option" :class="{ selected: form.paymentMethod === 'card' }">
-                <input v-model="form.paymentMethod" type="radio" value="card" >
-                <span class="radio-dot"/>
-                <div class="pay-text">
-                  <div class="pay-title-row">
-                    <CreditCard :size="14" class="card-icon" />
-                    <strong>Carte bancaire</strong>
-                  </div>
-                  <span>Visa, Mastercard — paiement sécurisé CMI.</span>
-                </div>
-              </label>
             </div>
 
             <!-- Address recap -->
@@ -476,6 +520,7 @@ async function placeOrder() {
   font-weight: 400;
   color: var(--dp-charcoal);
   margin: 0 0 2rem 0;
+  border-radius: 12px;
 }
 
 .field-row {

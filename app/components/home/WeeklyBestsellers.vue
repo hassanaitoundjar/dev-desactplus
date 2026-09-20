@@ -19,6 +19,15 @@ const categories = computed(() => {
   return list
 })
 
+const showAllCategories = ref(false)
+
+const visibleCategories = computed(() => {
+  if (showAllCategories.value) {
+    return categories.value
+  }
+  return categories.value.slice(0, 6)
+})
+
 const activeCategory = ref('all')
 
 const filteredProducts = computed(() => {
@@ -42,12 +51,27 @@ function setCategory(id: string) {
         <h2 class="title">Weekly bestsellers</h2>
         <div class="filters">
           <button 
-            v-for="cat in categories" 
+            v-for="cat in visibleCategories" 
             :key="cat.id" 
             :class="['filter-btn', 'font-body', { active: activeCategory === cat.id }]"
             @click="setCategory(cat.id)"
           >
             {{ cat.label }}
+          </button>
+          
+          <button 
+            v-if="categories.length > 6"
+            @click="showAllCategories = !showAllCategories" 
+            class="filter-btn font-body see-more-link" 
+            style="display: inline-flex; align-items: center; gap: 4px;"
+          >
+            {{ showAllCategories ? 'Voir moins' : 'Voir plus' }}
+            <svg v-if="!showAllCategories" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+            <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
           </button>
         </div>
       </div>

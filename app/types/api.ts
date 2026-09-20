@@ -15,6 +15,7 @@ export interface ApiProductVariant {
   sku: string
   title: string
   price?: number
+  compareAtPrice?: number
   calculated_price?: {
     calculated_amount: number
     currency_code: string

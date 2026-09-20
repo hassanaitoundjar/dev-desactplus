@@ -84,6 +84,13 @@ const displayPrice = computed(() => {
   return basePrice * quantity.value
 })
 
+const displayComparePrice = computed(() => {
+  if (!product.value) return null
+  const cp = selectedVariant.value?.compareAtPrice || product.value.compareAtPrice
+  if (!cp || cp <= 0) return null
+  return cp * quantity.value
+})
+
 
 
 const tabs = computed(() => [
@@ -254,7 +261,10 @@ async function handleReviewSubmit() {
 
           <div class="product-desc" v-html="product.shortDescription || product.description"></div>
 
-          <p class="product-price">{{ formatPrice(displayPrice) }}</p>
+          <div class="product-price-block">
+            <p class="product-price">{{ formatPrice(displayPrice) }}</p>
+            <p v-if="displayComparePrice" class="product-compare-price">{{ formatPrice(displayComparePrice) }}</p>
+          </div>
 
           <div class="product-options">
             
@@ -805,12 +815,28 @@ async function handleReviewSubmit() {
   font-weight: 600;
 }
 
+.product-price-block {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin: 0 0 2rem 0;
+}
+
 .product-price {
   font-family: var(--font-heading);
   font-size: 2rem;
   font-weight: 700;
   color: #F09B59;
-  margin: 0 0 2rem 0;
+  margin: 0;
+}
+
+.product-compare-price {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--dp-ash);
+  text-decoration: line-through;
+  margin: 0;
 }
 
 .product-desc {

@@ -67,7 +67,7 @@ export function mapApiProductToDomain(apiProduct: ApiProduct): Product {
         id: v.id,
         sku: v.sku,
         price: (v.calculated_price?.calculated_amount ?? v.prices?.[0]?.amount ?? v.price ?? 0) / 100,
-        compareAtPrice: undefined,
+        compareAtPrice: v.compareAtPrice ? v.compareAtPrice / 100 : undefined,
         inventoryQuantity: v.inventory_quantity ?? 0,
         options: Object.keys(mappedOptions).length > 0 ? mappedOptions : (v.options || {})
       }

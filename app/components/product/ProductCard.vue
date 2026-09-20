@@ -77,19 +77,18 @@ function prevImage(e: Event) {
 
 <template>
   <div :class="['pc-wrapper', `layout-${layout}`]">
-    <!-- Top Badges and Heart -->
-    <div class="pc-top-bar">
-      <div class="pc-badges">
-        <span v-if="isDiscounted" class="pc-badge badge-discount">-{{ discountPercent }}%</span>
-        <span v-if="product.isNew" class="pc-badge badge-new">NEW</span>
-      </div>
-      <button class="pc-wishlist-btn" aria-label="Add to favorites" @click.prevent="handleWishlist">
-        <Heart :size="18" stroke-width="1.5" :class="isWishlisted ? 'icon-active' : 'icon-default'" />
-      </button>
-    </div>
-
-    <!-- Image Container -->
+    <!-- Image Container with Overlays -->
     <div class="pc-image-container">
+      <div class="pc-top-bar">
+        <div class="pc-badges">
+          <span v-if="product.isNew" class="pc-badge badge-new">NEW</span>
+          <span v-if="isDiscounted" class="pc-badge badge-discount">-{{ discountPercent }}%</span>
+        </div>
+        <button class="pc-wishlist-btn" aria-label="Add to favorites" @click.prevent="handleWishlist">
+          <Heart :size="20" stroke-width="1.5" :class="isWishlisted ? 'icon-active' : 'icon-default'" />
+        </button>
+      </div>
+
       <NuxtLink :to="`/products/${product.slug}`" class="pc-image-link">
         <BaseImage
           :src="product.images?.[currentImageIndex]?.src || ''"
@@ -98,7 +97,7 @@ function prevImage(e: Event) {
         />
       </NuxtLink>
       
-      <!-- Image Carousel Arrows: always tappable on touch, hover-reveal on desktop via CSS -->
+      <!-- Image Carousel Arrows -->
       <button v-if="hasMultipleImages" class="img-nav-btn prev" aria-label="Previous image" @click.prevent="prevImage">
         <ChevronLeft :size="18" stroke-width="1.5" />
       </button>
@@ -126,26 +125,14 @@ function prevImage(e: Event) {
         </div>
       </NuxtLink>
       
-      <!-- Bottom Actions Area (Swatches vs Add to Cart) -->
+      <!-- Bottom Actions Area -->
       <div class="pc-bottom-actions">
-        <div class="pc-actions-hover">
-          <button class="btn-add-cart" :disabled="!product.variants?.length" @click.prevent="handleAddToCart">
-            <span v-if="!product.variants?.length">Indisponible</span>
-            <span v-else-if="isAdded">Ajouté !</span>
-            <span v-else>Add to cart</span>
-          </button>
-        </div>
-        <div class="pc-colors-wrapper">
-          <div v-if="product.colors && product.colors.length > 0" class="pc-colors">
-            <span 
-              v-for="(color, index) in product.colors" 
-              :key="index"
-              class="pc-color-swatch"
-              :style="{ backgroundColor: color }"
-            />
-          </div>
-          <div v-else class="pc-colors-empty"/>
-        </div>
+        <button class="btn-add-cart" :disabled="!product.variants?.length" @click.prevent="handleAddToCart">
+          <span v-if="!product.variants?.length">Indisponible</span>
+          <span v-else-if="isAdded">Ajouté !</span>
+          <span v-else>Add to cart</span>
+        </button>
+        
       </div>
     </div>
   </div>
@@ -160,23 +147,34 @@ function prevImage(e: Event) {
   position: relative;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   background-color: var(--dp-white);
-  padding: 16px;
-  border-radius: 16px;
+  border-radius: 12px;
+  overflow: hidden;
   box-shadow: 0 4px 12px rgba(0,0,0,0.03);
 }
 
 .pc-wrapper:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+.pc-image-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  aspect-ratio: 4 / 5;
+  background-color: #f9f9f9;
 }
 
 .pc-top-bar {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 8px;
-  z-index: 2;
-  position: relative;
+  z-index: 10;
 }
 
 .pc-badges {
@@ -187,40 +185,38 @@ function prevImage(e: Event) {
 }
 
 .pc-badge {
-  font-size: 0.65rem;
-  font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 99px;
   color: white;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .badge-new {
-  background-color: #2e7d32;
+  background-color: #4CAF50;
 }
 
 .badge-discount {
   background-color: #f38d53;
 }
 
-/* Larger tap target without shifting layout */
 .pc-wishlist-btn {
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 8px;
-  margin: -8px;
-  min-width: 40px;
-  min-height: 40px;
+  padding: 4px;
+  margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #999;
-  transition: color 0.2s;
+  color: #333;
+  transition: transform 0.2s;
 }
 
 .pc-wishlist-btn:hover {
-  color: #333;
+  transform: scale(1.1);
 }
 
 .icon-active {
@@ -228,13 +224,8 @@ function prevImage(e: Event) {
   fill: #ef4444;
 }
 
-.pc-image-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  aspect-ratio: 1 / 1;
-  margin-bottom: 16px;
+.icon-default {
+  color: #333;
 }
 
 .pc-image-link {
@@ -248,18 +239,17 @@ function prevImage(e: Event) {
 .pc-image {
   max-width: 100%;
   max-height: 100%;
-  object-fit: contain;
-  mix-blend-mode: multiply;
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
 }
 
-/* Visible/tappable by default (mobile); hover-reveal only on desktop */
 .img-nav-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.85);
+  background: transparent;
   border: none;
-  border-radius: 50%;
   width: 32px;
   height: 32px;
   display: flex;
@@ -269,21 +259,16 @@ function prevImage(e: Event) {
   cursor: pointer;
   opacity: 1;
   visibility: visible;
-  transition: opacity 0.2s ease, visibility 0.2s ease, background-color 0.2s ease;
-  z-index: 3;
-}
-
-.img-nav-btn:hover {
-  background: rgba(255, 255, 255, 1);
-  color: #000;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 10;
 }
 
 .img-nav-btn.prev {
-  left: 4px;
+  left: 0px;
 }
 
 .img-nav-btn.next {
-  right: 4px;
+  right: 0px;
 }
 
 @media (min-width: 1024px) {
@@ -302,6 +287,11 @@ function prevImage(e: Event) {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  padding: 16px;
+  background-color: var(--dp-white);
+  position: relative;
+  z-index: 5;
+  transition: transform 0.3s ease;
 }
 
 .pc-link {
@@ -322,7 +312,7 @@ function prevImage(e: Event) {
 
 .pc-title {
   font-family: var(--font-heading, sans-serif);
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: #2D2A26;
   margin: 0;
@@ -352,8 +342,8 @@ function prevImage(e: Event) {
 
 .pc-category {
   font-size: 0.875rem;
-  color: #999;
-  margin-bottom: 12px;
+  color: #888;
+  margin-bottom: 24px;
 }
 
 .pc-price-row {
@@ -364,99 +354,52 @@ function prevImage(e: Event) {
 }
 
 .pc-price-old {
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   color: #b3b3b3;
   text-decoration: line-through;
 }
 
 .pc-price-current {
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: #f38d53;
 }
 
 .pc-bottom-actions {
-  min-height: 32px;
   display: flex;
   align-items: center;
-  position: relative;
-}
-
-.pc-actions-hover {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  width: 100%;
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
-}
-
-@media (min-width: 480px) {
-  .pc-actions-hover {
-    gap: 8px;
-  }
-}
-
-.pc-colors-wrapper {
-  display: none;
+  gap: 12px;
 }
 
 @media (min-width: 1024px) {
-  .pc-actions-hover {
+  .pc-bottom-actions {
     position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 100%;
+    left: 16px;
+    right: 16px;
     opacity: 0;
     visibility: hidden;
+    transition: opacity 0.3s ease;
   }
 
-  .pc-colors-wrapper {
-    display: flex;
-    align-items: center;
-    height: 100%;
-    opacity: 1;
-    visibility: visible;
-    transition: opacity 0.2s ease, visibility 0.2s ease;
+  .pc-wrapper:hover .pc-info {
+    transform: translateY(-52px);
   }
 
-  .pc-wrapper:hover .pc-actions-hover {
+  .pc-wrapper:hover .pc-bottom-actions {
     opacity: 1;
     visibility: visible;
   }
-
-  .pc-wrapper:hover .pc-colors-wrapper {
-    opacity: 0;
-    visibility: hidden;
-  }
-}
-
-.pc-colors {
-  display: flex;
-  gap: 6px;
-}
-
-.pc-color-swatch {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 1px solid #e5e5e5;
-  box-shadow: inset 0 0 2px rgba(0,0,0,0.1);
-}
-
-.pc-colors-empty {
-  height: 12px;
 }
 
 .btn-add-cart {
-  width: 100%;
+  flex: 1;
   background-color: #f38d53;
   color: white;
   border: none;
-  border-radius: 9999px;
+  border-radius: 99px;
   padding: 10px 16px;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -474,21 +417,8 @@ function prevImage(e: Event) {
   cursor: not-allowed;
 }
 
-.btn-icon {
-  background: transparent;
-  border: none;
-  color: #666;
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.2s;
-}
 
-.btn-icon:hover {
-  color: #000;
-}
+
 
 /* List Layout */
 .layout-list {
@@ -498,12 +428,14 @@ function prevImage(e: Event) {
 }
 
 .layout-list .pc-image-container {
-  width: 200px;
+  width: 250px;
   margin-bottom: 0;
+  aspect-ratio: 1 / 1;
 }
 
 .layout-list .pc-info {
   flex: 1;
+  padding: 0;
 }
 
 @media (max-width: 640px) {
@@ -515,49 +447,40 @@ function prevImage(e: Event) {
 
   .layout-list .pc-image-container {
     width: 100%;
+    aspect-ratio: 4 / 5;
   }
 }
 
-/* Tighter mobile grid cards (2-col) */
+/* Tighter mobile grid cards */
 @media (max-width: 480px) {
   .pc-wrapper {
-    padding: 10px;
-    border-radius: 12px;
+    border-radius: 8px;
   }
 
-  .pc-image-container {
-    margin-bottom: 10px;
+  .pc-info {
+    padding: 12px;
   }
 
   .pc-title {
-    font-size: 0.85rem;
+    font-size: 0.95rem;
   }
 
   .pc-category {
-    font-size: 0.75rem;
-    margin-bottom: 8px;
-  }
-
-  .pc-price-row {
-    margin-bottom: 8px;
+    font-size: 0.8rem;
+    margin-bottom: 16px;
   }
 
   .pc-price-current {
-    font-size: 0.9rem;
-  }
-
-  .pc-price-old {
-    font-size: 0.75rem;
+    font-size: 1rem;
   }
 
   .btn-add-cart {
     padding: 8px 12px;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
   }
-
-  .pc-badge {
-    font-size: 0.6rem;
-    padding: 3px 6px;
+  
+  .pc-bottom-actions {
+    gap: 8px;
   }
 }
 </style>
