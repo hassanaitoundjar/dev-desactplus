@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import Container from '../ui/Container.vue'
 import { ref, computed } from 'vue'
+import { useCart } from '~/composables/useCart'
 
 // Product hotspot on a gallery image
 interface Hotspot {
   x: number // percentage from left
   y: number // percentage from top
-  label: string
+  title: string
+  price: string
+  description: string
+  image: string
   link: string
+  variantId?: string
 }
 
 // Gallery item type
@@ -39,27 +44,66 @@ const galleryItems: GalleryItem[] = [
   {
     id: '1',
     src: '/images/collection-salon.png',
-    alt: 'Salon contemporain avec canapé en velours',
+    alt: 'Salon contemporain avec table et suspensions',
     category: 'Salon',
     aspect: 'tall',
-    link: '/products?category=sofas',
+    link: '/products?category=tables',
     hotspots: [
-      { x: 45, y: 25, label: 'Suspension design', link: '/products?category=lighting' },
-      { x: 50, y: 58, label: 'Table ronde', link: '/products?category=tables' },
-      { x: 25, y: 65, label: 'Chaise velours', link: '/products?category=chairs' },
-      { x: 78, y: 30, label: 'Étagère vitrée', link: '/products?category=storage' },
+      {
+        x: 55,
+        y: 18,
+        title: 'Solitaire Pendant Light',
+        price: '$450.00',
+        description: 'Multi-tiered contemporary pendant lamp with matte white finish and brushed brass rod.',
+        image: '/images/category-lighting.jpg',
+        link: '/products?category=lighting',
+      },
+      {
+        x: 54,
+        y: 43,
+        title: 'Kumo Dining Table',
+        price: '$1,820.00',
+        description: 'The compact and well-proportioned silhouette of marble and walnut for timeless gatherings.',
+        image: '/images/category-tables.jpg',
+        link: '/products?category=tables',
+      },
+      {
+        x: 15,
+        y: 48,
+        title: 'Velvet Curve Chair',
+        price: '$340.00',
+        description: 'Sculpted dining armchair upholstered in ultra-soft taupe velvet with matte black steel legs.',
+        image: '/images/category-chairs.jpg',
+        link: '/products?category=chairs',
+      },
     ],
   },
   {
     id: '2',
     src: '/images/category-textiles.jpg',
-    alt: 'Textiles et couvertures artisanales',
-    category: 'Décoration',
+    alt: 'Fauteuil et textiles contemporains',
+    category: 'Salon',
     aspect: 'tall',
-    link: '/products?category=textiles',
+    link: '/products?category=armchairs',
     hotspots: [
-      { x: 60, y: 40, label: 'Plaid chunky', link: '/products?category=textiles' },
-      { x: 35, y: 55, label: 'Fauteuil lounge', link: '/products?category=armchairs' },
+      {
+        x: 38,
+        y: 55,
+        title: 'Elephant',
+        price: '$1,820.00',
+        description: 'The compact and well-proportioned silhouette of both the seats and the backrest.',
+        image: '/images/gallery/prod-elephant-armchair.png',
+        link: '/products?category=armchairs',
+      },
+      {
+        x: 65,
+        y: 38,
+        title: 'Chunky Wool Throw',
+        price: '$195.00',
+        description: 'Hand-knitted oversized wool throw bringing tactile warmth and cozy texture.',
+        image: '/images/category-textiles.jpg',
+        link: '/products?category=textiles',
+      },
     ],
   },
   {
@@ -70,9 +114,33 @@ const galleryItems: GalleryItem[] = [
     aspect: 'wide',
     link: '/products?category=tables',
     hotspots: [
-      { x: 35, y: 22, label: 'Suspensions céramique', link: '/products?category=lighting' },
-      { x: 45, y: 55, label: 'Table design', link: '/products?category=tables' },
-      { x: 72, y: 60, label: 'Fauteuil courbe', link: '/products?category=armchairs' },
+      {
+        x: 35,
+        y: 22,
+        title: 'Ceramic Pendant Light',
+        price: '$280.00',
+        description: 'Organic ceramic suspension with natural earthenware texture and warm diffused radiance.',
+        image: '/images/category-lighting.jpg',
+        link: '/products?category=lighting',
+      },
+      {
+        x: 48,
+        y: 56,
+        title: 'Nordic Oak Dining Table',
+        price: '$1,490.00',
+        description: 'Solid natural oak dining table with softly radiused corners and sculptural base.',
+        image: '/images/category-tables.jpg',
+        link: '/products?category=tables',
+      },
+      {
+        x: 72,
+        y: 60,
+        title: 'Curved Lounge Chair',
+        price: '$420.00',
+        description: 'Molded wood frame wrapped in textural bouclé upholstery.',
+        image: '/images/category-chairs.jpg',
+        link: '/products?category=armchairs',
+      },
     ],
   },
   {
@@ -83,7 +151,15 @@ const galleryItems: GalleryItem[] = [
     aspect: 'square',
     link: '/products?category=chairs',
     hotspots: [
-      { x: 50, y: 50, label: 'Chaise scandinave', link: '/products?category=chairs' },
+      {
+        x: 50,
+        y: 50,
+        title: 'Scandi Dining Chair',
+        price: '$290.00',
+        description: 'Iconic mid-century silhouette in solid ash with ergonomic molded curved backrest.',
+        image: '/images/category-chairs.jpg',
+        link: '/products?category=chairs',
+      },
     ],
   },
   {
@@ -94,8 +170,24 @@ const galleryItems: GalleryItem[] = [
     aspect: 'tall',
     link: '/products?category=beds',
     hotspots: [
-      { x: 50, y: 50, label: 'Lit king size', link: '/products?category=beds' },
-      { x: 25, y: 30, label: 'Lampe de chevet', link: '/products?category=lighting' },
+      {
+        x: 50,
+        y: 56,
+        title: 'Calm Linen King Bed',
+        price: '$2,250.00',
+        description: 'Upholstered platform bed tailored in Belgian linen with solid oak tapered legs.',
+        image: '/images/category-beds.jpg',
+        link: '/products?category=beds',
+      },
+      {
+        x: 24,
+        y: 38,
+        title: 'Alabaster Table Lamp',
+        price: '$180.00',
+        description: 'Translucent Spanish alabaster cylinder emitting a soothing, mellow bedside glow.',
+        image: '/images/category-lighting.jpg',
+        link: '/products?category=lighting',
+      },
     ],
   },
   {
@@ -106,8 +198,24 @@ const galleryItems: GalleryItem[] = [
     aspect: 'wide',
     link: '/products?category=tables',
     hotspots: [
-      { x: 50, y: 60, label: 'Table en bois', link: '/products?category=tables' },
-      { x: 30, y: 45, label: 'Vaisselle design', link: '/products?category=decor' },
+      {
+        x: 50,
+        y: 60,
+        title: 'Oak Kitchen Island',
+        price: '$1,350.00',
+        description: 'Solid natural timber worktable with integrated open slatted shelving.',
+        image: '/images/category-tables.jpg',
+        link: '/products?category=tables',
+      },
+      {
+        x: 30,
+        y: 45,
+        title: 'Ceramic Pitcher Set',
+        price: '$85.00',
+        description: 'Handmade stoneware ceramic pitcher and bowls with satin glaze.',
+        image: '/images/category-decor.jpg',
+        link: '/products?category=decor',
+      },
     ],
   },
   {
@@ -118,7 +226,15 @@ const galleryItems: GalleryItem[] = [
     aspect: 'square',
     link: '/products?category=decor',
     hotspots: [
-      { x: 50, y: 45, label: 'Décoration intérieure', link: '/products?category=decor' },
+      {
+        x: 50,
+        y: 45,
+        title: 'Terracotta Vase Trio',
+        price: '$120.00',
+        description: 'Hand-thrown earthen vases in warm earthy pigments and matte mineral slip.',
+        image: '/images/category-decor.jpg',
+        link: '/products?category=decor',
+      },
     ],
   },
   {
@@ -129,7 +245,15 @@ const galleryItems: GalleryItem[] = [
     aspect: 'tall',
     link: '/products?category=lighting',
     hotspots: [
-      { x: 50, y: 35, label: 'Luminaire suspension', link: '/products?category=lighting' },
+      {
+        x: 50,
+        y: 35,
+        title: 'Halo Brass Chandelier',
+        price: '$680.00',
+        description: 'Circular architectural ring suspended with warm dimmable LED ambiance.',
+        image: '/images/category-lighting.jpg',
+        link: '/products?category=lighting',
+      },
     ],
   },
   {
@@ -140,8 +264,24 @@ const galleryItems: GalleryItem[] = [
     aspect: 'wide',
     link: '/products?category=decor',
     hotspots: [
-      { x: 35, y: 50, label: 'Plante décorative', link: '/products?category=decor' },
-      { x: 65, y: 65, label: 'Cache-pot design', link: '/products?category=decor' },
+      {
+        x: 35,
+        y: 50,
+        title: 'Monstera Ceramic Planter',
+        price: '$140.00',
+        description: 'Elevated matte ceramic pedestal pot with porous terracotta reservoir.',
+        image: '/images/category-decor.jpg',
+        link: '/products?category=decor',
+      },
+      {
+        x: 65,
+        y: 65,
+        title: 'Fluted Pedestal Stand',
+        price: '$260.00',
+        description: 'Fluted architectural plinth crafted from cast plaster and aggregate stone.',
+        image: '/images/category-decor.jpg',
+        link: '/products?category=decor',
+      },
     ],
   },
   {
@@ -152,7 +292,15 @@ const galleryItems: GalleryItem[] = [
     aspect: 'square',
     link: '/products?category=decor',
     hotspots: [
-      { x: 50, y: 50, label: 'Accessoires bain', link: '/products?category=decor' },
+      {
+        x: 50,
+        y: 50,
+        title: 'Stone Washbasin Accessories',
+        price: '$95.00',
+        description: 'Monolithic travertine soap dispenser and marble amenity canister set.',
+        image: '/images/category-decor.jpg',
+        link: '/products?category=decor',
+      },
     ],
   },
   {
@@ -163,19 +311,43 @@ const galleryItems: GalleryItem[] = [
     aspect: 'wide',
     link: '/products?category=tables',
     hotspots: [
-      { x: 50, y: 50, label: 'Table basse', link: '/products?category=tables' },
+      {
+        x: 50,
+        y: 50,
+        title: 'Low Profile Coffee Table',
+        price: '$580.00',
+        description: 'Low-slung minimalist coffee table with organic bevel edge in dark walnut.',
+        image: '/images/category-tables.jpg',
+        link: '/products?category=tables',
+      },
     ],
   },
   {
     id: '12',
     src: '/images/category-sofas.jpg',
-    alt: 'Canapé d\'angle en cuir',
+    alt: 'Canapé d\'angle modulable',
     category: 'Salon',
     aspect: 'tall',
     link: '/products?category=sofas',
     hotspots: [
-      { x: 50, y: 55, label: 'Canapé d\'angle', link: '/products?category=sofas' },
-      { x: 30, y: 35, label: 'Coussin décoratif', link: '/products?category=textiles' },
+      {
+        x: 50,
+        y: 55,
+        title: 'Milano Modular Sofa',
+        price: '$2,450.00',
+        description: 'Deep-seat sectional sofa in heavyweight cream bouclé with down-blend cushions.',
+        image: '/images/category-sofas.jpg',
+        link: '/products?category=sofas',
+      },
+      {
+        x: 30,
+        y: 35,
+        title: 'Textured Linen Cushion',
+        price: '$65.00',
+        description: 'Stonewashed pure Belgian linen accent pillow with feather insert.',
+        image: '/images/category-textiles.jpg',
+        link: '/products?category=textiles',
+      },
     ],
   },
   {
@@ -186,7 +358,15 @@ const galleryItems: GalleryItem[] = [
     aspect: 'square',
     link: '/products?category=beds',
     hotspots: [
-      { x: 50, y: 50, label: 'Lit capitonné', link: '/products?category=beds' },
+      {
+        x: 50,
+        y: 50,
+        title: 'Tufted Velvet Platform Bed',
+        price: '$1,950.00',
+        description: 'Generously proportioned channel-tufted headboard in matte velvet finish.',
+        image: '/images/category-beds.jpg',
+        link: '/products?category=beds',
+      },
     ],
   },
   {
@@ -197,7 +377,15 @@ const galleryItems: GalleryItem[] = [
     aspect: 'wide',
     link: '/products?category=armchairs',
     hotspots: [
-      { x: 50, y: 50, label: 'Fauteuil lecture', link: '/products?category=armchairs' },
+      {
+        x: 50,
+        y: 50,
+        title: 'Cosy Swivel Armchair',
+        price: '$890.00',
+        description: 'Ergonomic 360-degree swivel armchair with cocooning high-density foam.',
+        image: '/images/category-armchairs.jpg',
+        link: '/products?category=armchairs',
+      },
     ],
   },
   {
@@ -208,7 +396,15 @@ const galleryItems: GalleryItem[] = [
     aspect: 'tall',
     link: '/products?category=lighting',
     hotspots: [
-      { x: 45, y: 30, label: 'Lampadaire arc', link: '/products?category=lighting' },
+      {
+        x: 45,
+        y: 30,
+        title: 'Arc Brass Floor Lamp',
+        price: '$540.00',
+        description: 'Sweeping architectural brass arch extending over sofa with marble counterbalance.',
+        image: '/images/category-lighting.jpg',
+        link: '/products?category=lighting',
+      },
     ],
   },
   {
@@ -219,7 +415,15 @@ const galleryItems: GalleryItem[] = [
     aspect: 'square',
     link: '/products?category=storage',
     hotspots: [
-      { x: 50, y: 50, label: 'Rangement modulaire', link: '/products?category=storage' },
+      {
+        x: 50,
+        y: 50,
+        title: 'Modular Credenza',
+        price: '$1,120.00',
+        description: 'Fluted sliding timber doors concealing adjustable interior shelving.',
+        image: '/images/category-storage.jpg',
+        link: '/products?category=storage',
+      },
     ],
   },
   {
@@ -230,8 +434,24 @@ const galleryItems: GalleryItem[] = [
     aspect: 'wide',
     link: '/products?category=sofas',
     hotspots: [
-      { x: 55, y: 55, label: 'Canapé modulable', link: '/products?category=sofas' },
-      { x: 30, y: 30, label: 'Lampe design', link: '/products?category=lighting' },
+      {
+        x: 55,
+        y: 55,
+        title: 'Horizon Lounge Sectional',
+        price: '$2,800.00',
+        description: 'Low-profile architectural modular sofa system in premium natural oat fabric.',
+        image: '/images/category-sofas.jpg',
+        link: '/products?category=sofas',
+      },
+      {
+        x: 30,
+        y: 30,
+        title: 'Minimal Globe Lamp',
+        price: '$210.00',
+        description: 'Satin matte brass stand supporting hand-blown milky glass orb.',
+        image: '/images/category-lighting.jpg',
+        link: '/products?category=lighting',
+      },
     ],
   },
   {
@@ -242,7 +462,15 @@ const galleryItems: GalleryItem[] = [
     aspect: 'square',
     link: '/products?category=toys',
     hotspots: [
-      { x: 50, y: 50, label: 'Jouets design', link: '/products?category=toys' },
+      {
+        x: 50,
+        y: 50,
+        title: 'Wooden Heirloom Play Set',
+        price: '$110.00',
+        description: 'Sustainably harvested beechwood educational building blocks with organic beeswax finish.',
+        image: '/images/category-toys.jpg',
+        link: '/products?category=toys',
+      },
     ],
   },
 ]
@@ -266,10 +494,68 @@ const hasMore = computed(() => visibleCount.value < totalFiltered.value)
 function setFilter(cat: string) {
   activeFilter.value = cat
   visibleCount.value = itemsPerPage
+  activeHotspotKey.value = null
 }
 
 function showMore() {
   visibleCount.value += itemsPerPage
+}
+
+// Hotspot hover & active state management
+const { add: addToCart, isOpen: isCartOpen } = useCart()
+const activeHotspotKey = ref<string | null>(null)
+let closeTimeout: ReturnType<typeof setTimeout> | null = null
+
+function openHotspot(key: string) {
+  if (closeTimeout) {
+    clearTimeout(closeTimeout)
+    closeTimeout = null
+  }
+  activeHotspotKey.value = key
+}
+
+function scheduleCloseHotspot(key: string) {
+  if (closeTimeout) clearTimeout(closeTimeout)
+  closeTimeout = setTimeout(() => {
+    if (activeHotspotKey.value === key) {
+      activeHotspotKey.value = null
+    }
+  }, 220)
+}
+
+function toggleHotspot(key: string) {
+  if (closeTimeout) {
+    clearTimeout(closeTimeout)
+    closeTimeout = null
+  }
+  if (activeHotspotKey.value === key) {
+    activeHotspotKey.value = null
+  } else {
+    activeHotspotKey.value = key
+  }
+}
+
+// Added to cart feedback map
+const addedMap = ref<Record<string, boolean>>({})
+
+async function onAddToCart(spot: Hotspot, key: string, e: Event) {
+  e.preventDefault()
+  e.stopPropagation()
+
+  if (spot.variantId) {
+    try {
+      await addToCart(spot.variantId, 1)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  addedMap.value[key] = true
+  isCartOpen.value = true
+
+  setTimeout(() => {
+    addedMap.value[key] = false
+  }, 2200)
 }
 
 // Scroll filter pills
@@ -306,8 +592,12 @@ const pillsContainer = ref<HTMLElement | null>(null)
             v-for="item in visibleItems"
             :key="item.id"
             class="dg-item"
-            :class="`dg-item--${item.aspect}`"
+            :class="[
+              `dg-item--${item.aspect}`,
+              { 'dg-item--has-active-hotspot': item.hotspots?.some((_, idx) => activeHotspotKey === `${item.id}-${idx}`) }
+            ]"
           >
+            <!-- Background Image Link -->
             <NuxtLink :to="item.link" class="dg-image-link">
               <img
                 :src="item.src"
@@ -321,20 +611,74 @@ const pillsContainer = ref<HTMLElement | null>(null)
             </NuxtLink>
 
             <!-- Product Hotspot Indicators -->
-            <template v-if="item.hotspots">
-              <NuxtLink
+            <template v-if="item.hotspots && item.hotspots.length > 0">
+              <div
                 v-for="(spot, idx) in item.hotspots"
                 :key="`${item.id}-spot-${idx}`"
-                :to="spot.link"
                 class="dg-hotspot"
+                :class="[
+                  `dg-hotspot--y-${spot.y < 45 ? 'bottom' : 'top'}`,
+                  `dg-hotspot--x-${spot.x < 30 ? 'right' : spot.x > 70 ? 'left' : 'center'}`,
+                  { 'dg-hotspot--active': activeHotspotKey === `${item.id}-${idx}` }
+                ]"
                 :style="{ left: `${spot.x}%`, top: `${spot.y}%` }"
-                @click.stop
+                @mouseenter="openHotspot(`${item.id}-${idx}`)"
+                @mouseleave="scheduleCloseHotspot(`${item.id}-${idx}`)"
+                @click.stop="toggleHotspot(`${item.id}-${idx}`)"
               >
-                <span class="dg-hotspot-dot">
-                  <span class="dg-hotspot-pulse"></span>
-                </span>
-                <span class="dg-hotspot-tooltip">{{ spot.label }}</span>
-              </NuxtLink>
+                <!-- Indicator Ring Button -->
+                <button
+                  type="button"
+                  class="dg-hotspot-btn"
+                  :aria-label="`Product: ${spot.title}`"
+                >
+                  <span class="dg-hotspot-pulse" />
+                  <span class="dg-hotspot-dot" />
+                </button>
+
+                <!-- Hover Product Card Popover -->
+                <Transition name="dg-card-fade">
+                  <div
+                    v-if="activeHotspotKey === `${item.id}-${idx}`"
+                    class="dg-card"
+                    @mouseenter="openHotspot(`${item.id}-${idx}`)"
+                    @mouseleave="scheduleCloseHotspot(`${item.id}-${idx}`)"
+                    @click.stop
+                  >
+                    <!-- Product Thumbnail -->
+                    <NuxtLink :to="spot.link" class="dg-card-image-wrap">
+                      <img
+                        :src="spot.image"
+                        :alt="spot.title"
+                        class="dg-card-image"
+                        loading="lazy"
+                      >
+                    </NuxtLink>
+
+                    <!-- Product Title -->
+                    <NuxtLink :to="spot.link" class="dg-card-title-link">
+                      <h4 class="dg-card-title">{{ spot.title }}</h4>
+                    </NuxtLink>
+
+                    <!-- Product Price -->
+                    <div class="dg-card-price">{{ spot.price }}</div>
+
+                    <!-- Product Description -->
+                    <p class="dg-card-desc">{{ spot.description }}</p>
+
+                    <!-- Add To Cart Button -->
+                    <button
+                      type="button"
+                      class="dg-card-btn"
+                      :class="{ 'dg-card-btn--added': addedMap[`${item.id}-${idx}`] }"
+                      @click="onAddToCart(spot, `${item.id}-${idx}`, $event)"
+                    >
+                      <span v-if="addedMap[`${item.id}-${idx}`]">Added ✓</span>
+                      <span v-else>Add to cart</span>
+                    </button>
+                  </div>
+                </Transition>
+              </div>
             </template>
           </div>
         </TransitionGroup>
@@ -343,7 +687,7 @@ const pillsContainer = ref<HTMLElement | null>(null)
       <!-- Footer -->
       <div class="dg-footer">
         <div class="dg-count-bar">
-          <div class="dg-count-fill" :style="{ width: `${Math.min((visibleItems.length / totalFiltered) * 100, 100)}%` }"></div>
+          <div class="dg-count-fill" :style="{ width: `${Math.min((visibleItems.length / totalFiltered) * 100, 100)}%` }" />
         </div>
         <p class="dg-count-text">
           Showing {{ visibleItems.length }} of {{ totalFiltered }} results
@@ -431,14 +775,14 @@ const pillsContainer = ref<HTMLElement | null>(null)
 }
 
 .dg-pill--active {
-  background-color: #7c5cfc;
-  border-color: #7c5cfc;
+  background-color: var(--dp-black);
+  border-color: var(--dp-black);
   color: var(--dp-white);
 }
 
 .dg-pill--active:hover {
-  background-color: #6a48e8;
-  border-color: #6a48e8;
+  background-color: var(--dp-black);
+  border-color: var(--dp-black);
 }
 
 /* ── Masonry Grid ──────────────────────────── */
@@ -465,9 +809,12 @@ const pillsContainer = ref<HTMLElement | null>(null)
   break-inside: avoid;
   margin-bottom: var(--space-4);
   position: relative;
-  overflow: hidden;
-  border-radius: var(--radius-md);
   display: block;
+  /* NO overflow:hidden here so the hover card can float outside item boundaries */
+}
+
+.dg-item--has-active-hotspot {
+  z-index: 45;
 }
 
 @media (min-width: 1280px) {
@@ -476,7 +823,7 @@ const pillsContainer = ref<HTMLElement | null>(null)
   }
 }
 
-/* ── Aspect-based fixed heights (match screenshot) ── */
+/* ── Aspect-based heights (match screenshot) ── */
 .dg-item--tall {
   height: 360px;
 }
@@ -517,12 +864,15 @@ const pillsContainer = ref<HTMLElement | null>(null)
   }
 }
 
-/* ── Image Link ────────────────────────────── */
+/* ── Image Link & Zoom ─────────────────────── */
 .dg-image-link {
   display: block;
   width: 100%;
   height: 100%;
   text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
 }
 
 .dg-image {
@@ -534,14 +884,14 @@ const pillsContainer = ref<HTMLElement | null>(null)
 }
 
 .dg-item:hover .dg-image {
-  transform: scale(1.05);
+  transform: scale(1.04);
 }
 
 /* ── Overlay ───────────────────────────────── */
 .dg-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.45) 100%);
+  background: linear-gradient(180deg, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
   display: flex;
   align-items: flex-end;
   padding: var(--space-4);
@@ -568,111 +918,256 @@ const pillsContainer = ref<HTMLElement | null>(null)
   border-radius: var(--radius-full);
 }
 
-/* ── Product Hotspot Indicators ────────────── */
+/* ── Product Hotspots ──────────────────────── */
 .dg-hotspot {
   position: absolute;
-  z-index: 5;
+  z-index: 20;
   transform: translate(-50%, -50%);
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-}
-
-.dg-hotspot-dot {
-  position: relative;
-  width: 14px;
-  height: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.dg-hotspot-dot::before {
-  content: '';
-  width: 10px;
-  height: 10px;
+.dg-hotspot--active {
+  z-index: 60;
+}
+
+/* ── Hotspot Ring Button ───────────────────── */
+.dg-hotspot-btn {
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background-color: var(--dp-white);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
   position: relative;
-  z-index: 2;
-  transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
-.dg-hotspot:hover .dg-hotspot-dot::before {
-  transform: scale(1.3);
-  background-color: #7c5cfc;
+.dg-hotspot-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease;
 }
 
-/* Pulse ring animation */
+/* Pulsing outer wave */
 .dg-hotspot-pulse {
   position: absolute;
-  inset: -3px;
+  inset: -6px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.6);
-  animation: hotspot-pulse 2s ease-out infinite;
+  border: 1.5px solid rgba(255, 255, 255, 0.75);
+  animation: hotspot-pulse 2.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+  pointer-events: none;
 }
 
 @keyframes hotspot-pulse {
   0% {
-    transform: scale(1);
-    opacity: 1;
+    transform: scale(0.85);
+    opacity: 0.9;
   }
-  70% {
-    transform: scale(2.2);
+  65% {
+    transform: scale(1.6);
     opacity: 0;
   }
   100% {
-    transform: scale(2.2);
+    transform: scale(1.6);
     opacity: 0;
   }
 }
 
-/* Tooltip */
-.dg-hotspot-tooltip {
-  position: absolute;
-  left: calc(100% + 6px);
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: var(--dp-white);
-  color: var(--dp-charcoal);
-  font-family: var(--font-body);
-  font-size: 0.7rem;
-  font-weight: 500;
-  padding: 0.35rem 0.65rem;
-  border-radius: var(--radius-md);
-  white-space: nowrap;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s ease, transform 0.25s ease;
-  transform: translateY(-50%) translateX(4px);
+.dg-hotspot:hover .dg-hotspot-btn,
+.dg-hotspot--active .dg-hotspot-btn {
+  transform: scale(1.18);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
 }
 
-.dg-hotspot-tooltip::before {
+.dg-hotspot:hover .dg-hotspot-pulse,
+.dg-hotspot--active .dg-hotspot-pulse {
+  animation-play-state: paused;
+  opacity: 0;
+}
+
+/* ── Product Card Popover ──────────────────── */
+.dg-card {
+  position: absolute;
+  width: 215px;
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.16), 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 22px 18px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: default;
+  pointer-events: auto;
+}
+
+/* Invisible hit bridge so mouse doesn't leave when crossing between button and card */
+.dg-card::before {
   content: '';
   position: absolute;
-  left: -4px;
-  top: 50%;
-  transform: translateY(-50%) rotate(45deg);
-  width: 8px;
-  height: 8px;
-  background-color: var(--dp-white);
-  box-shadow: -2px 2px 4px rgba(0, 0, 0, 0.05);
+  inset: -14px;
+  z-index: -1;
+  pointer-events: auto;
 }
 
-.dg-hotspot:hover .dg-hotspot-tooltip {
-  opacity: 1;
-  transform: translateY(-50%) translateX(0);
+/* ── Placement variations ── */
+/* Vertical: top (opens above dot) */
+.dg-hotspot--y-top .dg-card {
+  bottom: calc(100% + 14px);
 }
 
-/* On smaller items, show tooltip to the left if near right edge */
-@media (max-width: 768px) {
-  .dg-hotspot-tooltip {
-    font-size: 0.65rem;
-    padding: 0.25rem 0.5rem;
-  }
+/* Vertical: bottom (opens below dot) */
+.dg-hotspot--y-bottom .dg-card {
+  top: calc(100% + 14px);
+}
+
+/* Horizontal: center */
+.dg-hotspot--x-center .dg-card {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Horizontal: right (aligned towards right of dot) */
+.dg-hotspot--x-right .dg-card {
+  left: -12px;
+  transform: none;
+}
+
+/* Horizontal: left (aligned towards left of dot) */
+.dg-hotspot--x-left .dg-card {
+  right: -12px;
+  left: auto;
+  transform: none;
+}
+
+/* ── Card Interior Elements ────────────────── */
+.dg-card-image-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 110px;
+  height: 110px;
+  margin-bottom: 12px;
+  text-decoration: none;
+}
+
+.dg-card-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+  transition: transform 0.3s ease;
+}
+
+.dg-card-image-wrap:hover .dg-card-image {
+  transform: scale(1.05);
+}
+
+.dg-card-title-link {
+  text-decoration: none;
+  color: inherit;
+  margin-bottom: 4px;
+}
+
+.dg-card-title {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #18181b;
+  margin: 0;
+  line-height: 1.25;
+  transition: color 0.2s ease;
+}
+
+.dg-card-title-link:hover .dg-card-title {
+  color: #ea7e49;
+}
+
+.dg-card-price {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ea7e49;
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+}
+
+.dg-card-desc {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #71717a;
+  margin: 0 0 16px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.dg-card-btn {
+  background-color: #ea7e49;
+  color: #ffffff;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 8px 22px;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(234, 126, 73, 0.28);
+}
+
+.dg-card-btn:hover {
+  background-color: #d96d36;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(234, 126, 73, 0.4);
+}
+
+.dg-card-btn:active {
+  transform: translateY(0);
+}
+
+.dg-card-btn--added {
+  background-color: #10b981 !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* ── Card Transition Animation ─────────────── */
+.dg-card-fade-enter-active,
+.dg-card-fade-leave-active {
+  transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dg-card-fade-enter-from,
+.dg-card-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.94);
+}
+
+.dg-hotspot--x-center .dg-card-fade-enter-from,
+.dg-hotspot--x-center .dg-card-fade-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) scale(0.94);
 }
 
 /* ── Footer ────────────────────────────────── */
