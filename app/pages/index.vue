@@ -3,7 +3,6 @@ import Hero from '~/components/home/Hero.vue'
 import CategoryList from '~/components/home/CategoryList.vue'
 import WeeklyBestsellers from '~/components/home/WeeklyBestsellers.vue'
 import AtelierSection from '~/components/home/AtelierSection.vue'
-import FeaturedProjects from '~/components/home/FeaturedProjects.vue'
 import Testimonials from '~/components/home/Testimonials.vue'
 import TrustBar from '~/components/home/TrustBar.vue'
 import DesignGallery from '~/components/home/DesignGallery.vue'
@@ -22,7 +21,6 @@ useSeo({
     <CategoryList />
     <WeeklyBestsellers />
     <AtelierSection />
-    <FeaturedProjects />
     <DesignGallery />
     <Testimonials />
     <LatestArticles/>

@@ -15,7 +15,7 @@ export default defineNuxtConfig({
         'frame-ancestors': ["'none'"],
         'img-src': ["'self'", 'data:', 'blob:', 'https:', '*'], // Allow images from anywhere, as they might come from Medusa or S3
         'object-src': ["'none'"],
-        'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // 'unsafe-eval' often needed for Vue in dev/runtime compilation, strict environments might remove it
+        'script-src': ["'self'", "'unsafe-inline'"], // Removed 'unsafe-eval' for security
         'script-src-attr': ["'none'"],
         'style-src': ["'self'", 'https:', "'unsafe-inline'", 'https://fonts.googleapis.com'],
         'connect-src': ["'self'", 'https:', 'http:', 'http://localhost:9000', '*'], // API connections
@@ -64,14 +64,14 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      siteUrl: 'https://desactplus.ma',
-      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8000/api',
-      storefrontApiKey: process.env.NUXT_PUBLIC_STOREFRONT_API_KEY || '',
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL,
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL,
+      storefrontApiKey: process.env.NUXT_PUBLIC_STOREFRONT_API_KEY,
     },
   },
 
   image: {
-    domains: ['zainstudio.ma'],
+    domains: ['https://desactplus.ma'],
     quality: 80,
     format: ['webp', 'avif'],
     screens: {
