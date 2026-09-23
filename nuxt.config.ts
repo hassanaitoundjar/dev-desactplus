@@ -64,9 +64,9 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      siteUrl: process.env.NUXT_PUBLIC_SITE_URL,
-      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL,
-      storefrontApiKey: process.env.NUXT_PUBLIC_STOREFRONT_API_KEY,
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || process.env.PUBLIC_SITE_URL || '',
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || process.env.PUBLIC_API_BASE_URL || '',
+      storefrontApiKey: process.env.NUXT_PUBLIC_STOREFRONT_API_KEY || process.env.PUBLIC_STOREFRONT_API_KEY || '',
     },
   },
 
