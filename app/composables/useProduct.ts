@@ -1,21 +1,20 @@
-import { getProductBySlug, getRelatedProducts } from '~/repositories/product.repository'
+import { getProductBySlug } from '~/repositories/product.repository'
 
 export function useProduct(slug: string | Ref<string>) {
   const resolvedSlug = isRef(slug) ? slug : ref(slug)
 
-  const { data: product, pending, error } = useAsyncData(
-    `product-${toValue(resolvedSlug)}`,
-    () => getProductBySlug(toValue(resolvedSlug)),
-    { watch: [resolvedSlug] },
-  )
+  const product = ref<any>(null)
+  const related = ref<any[]>([])
 
-  const { data: related } = useAsyncData(
-    `related-${toValue(resolvedSlug)}`,
+  const { pending, error } = useAsyncData(
+    () => `product-${toValue(resolvedSlug)}`,
     async () => {
-      if (!product.value) return []
-      return getRelatedProducts(product.value.slug, product.value.categoryId)
+      const result = await getProductBySlug(toValue(resolvedSlug))
+      product.value = result.product ?? null
+      related.value = result.related ?? []
+      return result
     },
-    { watch: [product], default: () => [] },
+    { watch: [resolvedSlug] },
   )
 
   return { product, related, pending, error }

@@ -14,6 +14,7 @@ interface StoreProductsResponse {
 // API Store API response wrapper for a single product
 interface StoreProductResponse {
   product: ApiProduct
+  related?: ApiProduct[]
 }
 
 /**
@@ -37,17 +38,16 @@ export async function getAllProducts(): Promise<Product[]> {
   }
 }
 
-export async function getProductBySlug(slug: string): Promise<Product | undefined> {
+export async function getProductBySlug(slug: string): Promise<{ product: Product | undefined; related: Product[] }> {
   const client = useApiClient()
   try {
     const data = await client.get<StoreProductResponse>(`/store/products/${slug}`)
-    if (data.product) {
-      return mapApiProductToDomain(data.product)
-    }
-    return undefined
+    const product = data.product ? mapApiProductToDomain(data.product) : undefined
+    const related = (data.related || []).map(mapApiProductToDomain)
+    return { product, related }
   } catch (error) {
     console.error(`Failed to fetch product by slug ${slug}:`, error)
-    return undefined
+    return { product: undefined, related: [] }
   }
 }
 

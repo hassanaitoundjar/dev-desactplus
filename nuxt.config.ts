@@ -71,7 +71,7 @@ export default defineNuxtConfig({
   },
 
   image: {
-    domains: ['https://desactplus.ma'],
+    domains: ['https://desactplus.com'],
     quality: 80,
     format: ['webp', 'avif'],
     screens: {
@@ -87,5 +87,5 @@ export default defineNuxtConfig({
   typescript: {
     strict: true,
     typeCheck: false,
-  },
+  }
 })

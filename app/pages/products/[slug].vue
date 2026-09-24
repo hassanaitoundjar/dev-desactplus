@@ -182,8 +182,67 @@ async function handleReviewSubmit() {
 </script>
 
 <template>
-  <div v-if="pending" class="loading-page">
-    <Container>Chargement du produit...</Container>
+  <div v-if="pending" class="pdp-page">
+    <Container>
+      <!-- Skeleton Breadcrumb -->
+      <div class="skeleton-breadcrumb">
+        <span class="skeleton-bone animate-shimmer" style="width: 60px; height: 12px;" />
+        <span class="skeleton-bone animate-shimmer" style="width: 8px; height: 12px;" />
+        <span class="skeleton-bone animate-shimmer" style="width: 80px; height: 12px;" />
+        <span class="skeleton-bone animate-shimmer" style="width: 8px; height: 12px;" />
+        <span class="skeleton-bone animate-shimmer" style="width: 140px; height: 12px;" />
+      </div>
+
+      <div class="product-top">
+        <!-- Skeleton Gallery -->
+        <div class="product-gallery">
+          <div class="gallery-thumbnails">
+            <div v-for="n in 4" :key="n" class="skeleton-thumb animate-shimmer" />
+          </div>
+          <div class="gallery-main">
+            <div class="skeleton-main-img animate-shimmer" />
+          </div>
+        </div>
+
+        <!-- Skeleton Product Info -->
+        <div class="product-info">
+          <div class="skeleton-header">
+            <div class="skeleton-bone animate-shimmer" style="width: 70%; height: 32px; border-radius: 4px;" />
+            <div class="skeleton-bone animate-shimmer" style="width: 90px; height: 36px; border-radius: 8px;" />
+          </div>
+          <div class="skeleton-bone animate-shimmer" style="width: 120px; height: 14px; margin-bottom: 0.75rem;" />
+          <div class="skeleton-bone animate-shimmer" style="width: 180px; height: 14px; margin-bottom: 2rem;" />
+          
+          <!-- Skeleton promo box -->
+          <div class="skeleton-promo animate-shimmer" />
+
+          <!-- Skeleton description lines -->
+          <div class="skeleton-bone animate-shimmer" style="width: 100%; height: 14px; margin-bottom: 0.5rem;" />
+          <div class="skeleton-bone animate-shimmer" style="width: 85%; height: 14px; margin-bottom: 0.5rem;" />
+          <div class="skeleton-bone animate-shimmer" style="width: 60%; height: 14px; margin-bottom: 2rem;" />
+
+          <!-- Skeleton price -->
+          <div class="skeleton-bone animate-shimmer" style="width: 160px; height: 28px; margin-bottom: 2rem;" />
+
+          <!-- Skeleton swatches -->
+          <div style="display: flex; gap: 0.75rem; margin-bottom: 2rem;">
+            <div v-for="n in 4" :key="n" class="skeleton-swatch animate-shimmer" />
+          </div>
+
+          <!-- Skeleton actions -->
+          <div class="skeleton-actions">
+            <div class="skeleton-bone animate-shimmer" style="width: 130px; height: 48px; border-radius: 4px;" />
+            <div class="skeleton-bone animate-shimmer" style="flex: 1; height: 48px; border-radius: 4px;" />
+            <div class="skeleton-bone animate-shimmer" style="flex: 1; height: 48px; border-radius: 4px;" />
+          </div>
+
+          <!-- Skeleton trust badges -->
+          <div class="skeleton-badges">
+            <div v-for="n in 4" :key="n" class="skeleton-badge animate-shimmer" />
+          </div>
+        </div>
+      </div>
+    </Container>
   </div>
   <div v-else-if="error" class="error-page">
     <Container>Une erreur est survenue : {{ error.message }}</Container>
@@ -1709,5 +1768,71 @@ async function handleReviewSubmit() {
 .btn-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* ─── Skeleton Loader ─── */
+.skeleton-bone {
+  display: block;
+  border-radius: 3px;
+}
+
+.skeleton-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 3rem;
+}
+
+.skeleton-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.skeleton-thumb {
+  width: 80px;
+  height: 80px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.skeleton-main-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 2px;
+}
+
+.skeleton-promo {
+  width: 100%;
+  height: 72px;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.skeleton-swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.skeleton-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.skeleton-badges {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.skeleton-badge {
+  height: 44px;
+  border-radius: 6px;
 }
 </style>
